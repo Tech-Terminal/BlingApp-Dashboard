@@ -1,0 +1,28 @@
+//
+// To make future updates easier consider overriding the global variables from _variables.bootstrap.scss and _variables.custom.scss for current demo in this file.
+// Note that this file is included first and variables defined in _variables.bootstrap.scss and _variables.custom.scss
+// are not accessible in this file but you can override any global variable as shown below:
+//
+
+// Bling Dashboard Custom Variables
+$primary: #06484E !default;
+$primary-active: #04363b !default;
+$primary-light: #e6f3f4 !default;
+$primary-clarity: rgba(#06484E, 0.2) !default;
+
+$primary-dark: #06484E !default;
+$primary-active-dark: #04363b !default;
+$primary-light-dark: #021a1d !default;
+$primary-clarity-dark: rgba(#06484E, 0.2) !default;
+
+// Bling Pink Accent (mapped to info for highlights)
+$info: #F46399 !default;
+$info-active: #d64d7f !default;
+$info-light: #fde8ef !default;
+$info-clarity: rgba(#F46399, 0.2) !default;
+
+$border-radius: 0.75rem !default;
+$border-radius-sm: 0.5rem !default;
+$border-radius-lg: 1rem !default;
+
+$font-family-sans-serif: 'Cairo', Helvetica, "sans-serif" !default;

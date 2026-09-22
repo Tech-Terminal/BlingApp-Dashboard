@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ar" dir="rtl" direction="rtl" style="direction: rtl;" translate="no" class="notranslate">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Bling Dashboard" />
+  <link rel="icon" type="image/png" href="/media/favicon.png" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="/splash-screen.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bling Dashboard</title>
+</head>
+
+<body id="kt_body" class="page-loading">
+  <!--begin::Theme mode setup on page load-->
+  <script>
+    let themeMode = "light";
+
+    if (localStorage.getItem("kt_theme_mode_value")) {
+      themeMode = localStorage.getItem("kt_theme_mode_value");
+    }
+
+    if (themeMode === "system") {
+      themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+
+    document.documentElement.setAttribute("data-bs-theme", themeMode);
+  </script>
+  <!--end::Theme mode setup on page load-->
+
+  <div id="app"></div>
+
+  <!--begin::Loading markup-->
+  <div id="splash-screen" class="splash-screen">
+    <img src="media/white_logo.svg" class="dark-logo" alt="Bling dark logo" />
+    <img src="media/logo.svg" class="light-logo" alt="Bling light logo" />
+    <div class="loader-wrapper">
+      <span class="loader"></span>
+      <span class="loading-text">جاري التحميل...</span>
+    </div>
+  </div>
+  <!--end::Loading markup-->
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

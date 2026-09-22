@@ -1,0 +1,77 @@
+//
+// Theme style
+//
+
+// Initialize
+@import "init";
+
+// Components
+@import "./core/components/components";
+@import "components/components";
+
+// Layout
+@import "layout/layout";
+
+
+
+// SweetAlert2 - force LTR only on the icon so animations render correctly
+.swal2-icon {
+  direction: ltr !important;
+}
+
+
+// Global RTL Fixes for Dashboard
+/* rtl:begin:ignore */
+input[type="email"] {
+  direction: rtl !important;
+  text-align: right !important;
+}
+input[type="email"]::placeholder,
+input.form-control[type="email"]::placeholder {
+  text-align: right !important;
+  direction: rtl !important;
+}
+
+.v-select {
+  direction: rtl !important;
+  
+  .vs__dropdown-toggle {
+    direction: rtl !important;
+  }
+  
+  .vs__selected {
+    margin: 4px 0 4px 5px !important;
+  }
+  
+  .vs__deselect {
+    margin-left: 0 !important;
+    margin-right: 8px !important;
+  }
+  
+  .vs__actions {
+    padding: 0 5px 0 0 !important;
+  }
+  
+  .vs__dropdown-menu {
+    text-align: right !important;
+  }
+  
+  .vs__search {
+    text-align: right !important;
+    direction: rtl !important;
+  }
+  
+  .vs__search::placeholder {
+    text-align: right !important;
+    direction: rtl !important;
+  }
+}
+/* rtl:end:ignore */
+
+/* Remove Bootstrap's validation exclamation/feedback background icon from inputs */
+.form-control.is-invalid,
+.was-validated .form-control:invalid,
+.form-select.is-invalid,
+.was-validated .form-select:invalid {
+  background-image: none !important;
+}
