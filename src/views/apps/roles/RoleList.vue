@@ -71,7 +71,7 @@
                 <h2>{{ role.name }}</h2>
               </div>
               <!--end::Card title-->
-              <div class="card-toolbar" v-if="!role.is_system_role">
+              <div class="card-toolbar" v-if="!role.isSuperAdmin">
                 <span class="cursor-pointer" @click="deleteRole(role)">
                   <i class="fas fa-trash fs-4 text-danger"></i>
                 </span>
@@ -121,7 +121,7 @@
               </router-link>
 
               <router-link
-                v-if="!role.is_system_role"
+                v-if="!role.isSuperAdmin"
                 :to="{ name: 'role-edit', params: { id: role.id } }"
                 class="btn btn-light btn-active-light-primary my-1"
               >

@@ -9,8 +9,10 @@ class AreaService {
    * @param params
    * @returns
    */
-  public static getAll(params: any) {
-    return ApiService.query("admin/areas", params);
+  public static getAll(params: any = {}) {
+    return ApiService.query("areas", params).then(
+      ApiService.extractPaginatedData,
+    );
   }
 
   /**
@@ -19,7 +21,9 @@ class AreaService {
    * @returns
    */
   public static get(id: string | number) {
-    return ApiService.get("admin/areas", `${id}`);
+    return ApiService.get("areas", `${id}`).then(
+      ApiService.extractSingleData,
+    );
   }
 
   /**
@@ -28,7 +32,7 @@ class AreaService {
    * @returns
    */
   public static create(params: any) {
-    return ApiService.post("admin/areas", params, "Area created successfully!");
+    return ApiService.post("areas", params, "Area created successfully!");
   }
 
   /**
@@ -38,8 +42,8 @@ class AreaService {
    * @returns
    */
   public static update(id: string | number, params: any) {
-    return ApiService.put(
-      `admin/areas/${id}`,
+    return ApiService.patch(
+      `areas/${id}`,
       params,
       "Area updated successfully!",
     );
@@ -51,7 +55,7 @@ class AreaService {
    * @returns
    */
   public static delete(id: string | number) {
-    return ApiService.delete(`admin/areas/${id}`, "Area has been deleted.");
+    return ApiService.delete(`areas/${id}`, "Area has been deleted.");
   }
 }
 

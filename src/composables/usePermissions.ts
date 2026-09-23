@@ -13,6 +13,10 @@ export function usePermissions() {
   const hasPermission = (permission?: string): boolean => {
     if (!permission) return true;
 
+    // Super Admin has unrestricted access to all modules
+    // @ts-ignore
+    if (user.value?.role?.isSuperAdmin) return true;
+
     // @ts-ignore
     let permissions = user.value?.role?.permissions;
     if (typeof permissions === "string") {
@@ -41,6 +45,10 @@ export function usePermissions() {
    * @returns boolean
    */
   const can = (action: string, module: string): boolean => {
+    // Super Admin has unrestricted access to all actions
+    // @ts-ignore
+    if (user.value?.role?.isSuperAdmin) return true;
+
     // @ts-ignore
     let permissions = user.value?.role?.permissions;
     if (typeof permissions === "string") {

@@ -323,7 +323,7 @@ class MenuComponent {
 
     // sanitize property name to css notation
     // (hyphen separated words eg. font-Size)
-    styleProp = styleProp.replace(/([A-Z])/g, "-EGP 1").toLowerCase();
+    styleProp = styleProp.replace(/([A-Z])/g, "-$1").toLowerCase();
 
     return defaultView.getComputedStyle(el, null).getPropertyValue(styleProp);
   };
@@ -331,7 +331,11 @@ class MenuComponent {
   // Get item sub type
   private _getItemSubType = (element: HTMLElement) => {
     const sub = this._getItemSubElement(element);
-    if (sub && parseInt(this._getCss(sub as HTMLElement, "z-index")) > 0) {
+    if (
+      sub &&
+      (parseInt(this._getCss(sub as HTMLElement, "z-index")) > 0 ||
+        sub.classList.contains("menu-sub-dropdown"))
+    ) {
       return "dropdown";
     } else {
       return "accordion";
@@ -468,6 +472,10 @@ class MenuComponent {
     }
 
     if (reference) {
+      if (DataUtil.has(item, "popper")) {
+        // @ts-ignore
+        DataUtil.get(item, "popper")?.destroy();
+      }
       const popper = createPopper(
         reference as Element | VirtualElement,
         sub,
@@ -853,6 +861,10 @@ class MenuComponent {
     return this._getItemToggleElement(item);
   };
 
+  public setTriggerElement = () => {
+    return this._setTriggerElement();
+  };
+
   public getItemSubElement = (item: HTMLElement) => {
     return this._getItemSubElement(item);
   };
@@ -898,6 +910,10 @@ class MenuComponent {
   // public static methods
   // Get KTMenu instance by element
   public static getInstance = (element: HTMLElement): MenuComponent | null => {
+    if (!element) {
+      return null;
+    }
+
     // Element has menu DOM reference in it's DATA storage
     const elementMenu = DataUtil.get(element, "menu");
     if (elementMenu) {
@@ -914,7 +930,7 @@ class MenuComponent {
     }
 
     // Element has a parent with DOM reference to .menu in it's DATA storage
-    if (element.classList.contains("menu-link")) {
+    if (element.classList && element.classList.contains("menu-link")) {
       const sub = element.closest(".menu-sub");
       if (sub) {
         const subMenu = DataUtil.get(sub as HTMLElement, "menu");
@@ -922,6 +938,38 @@ class MenuComponent {
           return subMenu as MenuComponent;
         }
       }
+    }
+
+    // Element is a trigger for a menu - resolve its associated menu
+    if (element.hasAttribute && element.hasAttribute("data-kt-menu-trigger")) {
+      const targetSelector = element.getAttribute("data-kt-menu-target");
+      let menuEl: HTMLElement | null = null;
+      if (targetSelector) {
+        menuEl = document.querySelector(targetSelector);
+      } else if (
+        element.nextElementSibling &&
+        (element.nextElementSibling as HTMLElement).getAttribute("data-kt-menu") === "true"
+      ) {
+        menuEl = element.nextElementSibling as HTMLElement;
+      } else if (element.parentElement) {
+        menuEl = element.parentElement.querySelector('[data-kt-menu="true"]');
+      }
+
+      if (menuEl) {
+        let menuInstance = DataUtil.get(menuEl, "menu") as MenuComponent;
+        if (!menuInstance) {
+          menuInstance = new MenuComponent(menuEl, defaultMenuOptions);
+        }
+        menuInstance.triggerElement = element;
+        DataUtil.set(element, "menu", menuInstance);
+        return menuInstance;
+      }
+    }
+
+    // Element itself has data-kt-menu="true"
+    if (element.getAttribute && element.getAttribute("data-kt-menu") === "true") {
+      const menuInstance = new MenuComponent(element, defaultMenuOptions);
+      return menuInstance;
     }
 
     return null;
@@ -980,6 +1028,8 @@ class MenuComponent {
       let menuInstance = MenuComponent.getInstance(menuItem);
       if (!menuInstance) {
         menuInstance = new MenuComponent(el as HTMLElement, defaultMenuOptions);
+      } else {
+        menuInstance.setTriggerElement();
       }
     });
   };

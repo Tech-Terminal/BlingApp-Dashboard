@@ -12,7 +12,7 @@
       <!--begin::Copyright-->
       <div class="text-gray-900 order-2 order-md-1">
         <span class="text-muted fw-semibold me-1">{{ year }}&copy;</span>
-        <a href="#" class="text-gray-800 text-hover-primary">صـيدلـي</a>
+        <a href="#" class="text-gray-800 text-hover-primary">Bling</a>
       </div>
       <!--end::Copyright-->
 

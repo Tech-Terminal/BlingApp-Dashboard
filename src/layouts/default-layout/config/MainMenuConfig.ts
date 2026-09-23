@@ -13,79 +13,22 @@ const MainMenuConfig: Array<MenuItem> = [
   },
 
   {
-    heading: "Company Management",
-    route: "/companies",
+    heading: "User Management",
+    route: "/clients",
     pages: [
       {
-        route: "/companies/companies-listing",
-        keenthemesIcon: "briefcase",
-        bootstrapIcon: "bi-building",
-        permission: "company",
+        heading: "clients",
+        route: "/clients/clients-listing",
+        keenthemesIcon: "profile-user",
+        bootstrapIcon: "bi-people",
+        permission: "client",
       },
       {
-        heading: "Company Requests",
-        route: "/companies/requests",
-        keenthemesIcon: "document",
-        bootstrapIcon: "bi-file-earmark-text",
-        permission: "company_request",
-      },
-    ],
-  },
-
-  {
-    heading: "Medical Core",
-    route: "/active-ingredients",
-    pages: [
-      {
-        heading: "Warning Guides",
-        route: "/warning-guides",
-        keenthemesIcon: "message-text-2",
-        bootstrapIcon: "bi-exclamation-triangle",
-        permission: "warning_guide",
-      },
-      {
-        heading: "Active Ingredient Categories",
-        route: "/active-ingredient-categories",
-        keenthemesIcon: "category",
-        bootstrapIcon: "bi-tags",
-        permission: "active_ingredient_category",
-      },
-      {
-        route: "/symptoms",
-        keenthemesIcon: "virus",
-        bootstrapIcon: "bi-activity",
-        permission: "symptom",
-      },
-      {
-        route: "/chronic-conditions",
-        keenthemesIcon: "pulse",
-        bootstrapIcon: "bi-heart-pulse",
-        permission: "chronic_condition",
-      },
-    ],
-  },
-
-  {
-    heading: "Pharmaceutical Data",
-    route: "/active-ingredients",
-    pages: [
-      {
-        route: "/active-ingredients",
-        keenthemesIcon: "capsule",
-        bootstrapIcon: "bi-capsule",
-        permission: "active_ingredient",
-      },
-      {
-        route: "/medicines",
-        keenthemesIcon: "pill",
-        bootstrapIcon: "bi-prescription2",
-        permission: "medicine",
-      },
-      {
-        route: "/drug-interactions",
-        keenthemesIcon: "shield-slash",
-        bootstrapIcon: "bi-shield-slash",
-        permission: "drug_interaction",
+        heading: "addresses",
+        route: "/addresses/addresses-listing",
+        keenthemesIcon: "geolocation",
+        bootstrapIcon: "bi-geo-alt",
+        permission: "address",
       },
     ],
   },
@@ -108,7 +51,6 @@ const MainMenuConfig: Array<MenuItem> = [
         bootstrapIcon: "bi-shield-lock",
         permission: "role",
       },
-
       {
         heading: "governorates",
         route: "/locations/governorates",

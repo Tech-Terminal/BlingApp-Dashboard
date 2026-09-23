@@ -9,8 +9,10 @@ class GovernorateService {
    * @param params
    * @returns
    */
-  public static getAll(params: any) {
-    return ApiService.query("admin/governorates", params);
+  public static getAll(params: any = {}) {
+    return ApiService.query("governorates", params).then(
+      ApiService.extractPaginatedData,
+    );
   }
 
   /**
@@ -18,8 +20,10 @@ class GovernorateService {
    * @param id
    * @returns
    */
-  public static get(id: string) {
-    return ApiService.get("admin/governorates", id);
+  public static get(id: string | number) {
+    return ApiService.get("governorates", `${id}`).then(
+      ApiService.extractSingleData,
+    );
   }
 
   /**
@@ -29,7 +33,7 @@ class GovernorateService {
    */
   public static create(params: any) {
     return ApiService.post(
-      "admin/governorates",
+      "governorates",
       params,
       "Governorate created successfully!",
     );
@@ -41,9 +45,9 @@ class GovernorateService {
    * @param params
    * @returns
    */
-  public static update(id: string, params: any) {
-    return ApiService.put(
-      `admin/governorates/${id}`,
+  public static update(id: string | number, params: any) {
+    return ApiService.patch(
+      `governorates/${id}`,
       params,
       "Governorate updated successfully!",
     );
@@ -54,9 +58,9 @@ class GovernorateService {
    * @param id
    * @returns
    */
-  public static delete(id: string) {
+  public static delete(id: string | number) {
     return ApiService.delete(
-      `admin/governorates/${id}`,
+      `governorates/${id}`,
       "Governorate has been deleted.",
     );
   }

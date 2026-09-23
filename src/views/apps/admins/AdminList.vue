@@ -28,7 +28,11 @@
           class="d-flex justify-content-end"
           data-kt-customer-table-toolbar="base"
         >
-          <FilterMenu @apply="applyFilter" @reset="resetFilter">
+          <FilterMenu
+            :filters="filters"
+            @apply="applyFilter"
+            @reset="resetFilter"
+          >
             <!--begin::Input group-->
             <div class="mb-10">
               <label class="form-label fs-6 fw-semibold"
@@ -37,7 +41,7 @@
               <SearchableSelect
                 v-model="filters.roleId"
                 :service="RoleService"
-                label="nameAr"
+                label="name"
                 :placeholder="translate('Select Role')"
               />
             </div>

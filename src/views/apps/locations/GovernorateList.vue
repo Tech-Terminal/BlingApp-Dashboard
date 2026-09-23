@@ -13,7 +13,7 @@
             type="text"
             v-model="search"
             @input="searchGovernorates()"
-            class="form-control form-control-solid w-100 w-md-250px ps-15"
+            class="form-control w-100 w-md-250px ps-15"
             :placeholder="translate('Search Governorates')"
           />
         </div>
@@ -24,14 +24,13 @@
       <!--begin::Card toolbar-->
       <div class="card-toolbar">
         <div class="d-flex justify-content-end">
-          <button
-            type="button"
+          <router-link
+            :to="{ name: 'governorate-create' }"
             class="btn btn-primary"
-            @click="openCreateModal()"
           >
             <KTIcon icon-name="plus" icon-class="fs-2" />
             {{ translate("Add Governorate") }}
-          </button>
+          </router-link>
         </div>
       </div>
       <!--end::Card toolbar-->
@@ -66,7 +65,7 @@
             <tr
               class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0"
             >
-              <th class="min-w-50px">#</th>
+              <th class="min-w-50px">ID</th>
               <th class="min-w-150px">{{ translate("English Name") }}</th>
               <th class="min-w-150px">{{ translate("Arabic Name") }}</th>
               <th class="min-w-100px">{{ translate("Areas Count") }}</th>
@@ -76,8 +75,8 @@
           <tbody class="fw-semibold text-gray-600">
             <tr v-for="gov in governorates" :key="gov.id">
               <td>{{ gov.id }}</td>
-              <td class="text-gray-800 fw-bold">{{ gov.nameEn }}</td>
-              <td class="text-gray-800 fw-bold">{{ gov.nameAr }}</td>
+              <td class="text-gray-800 fw-bold">{{ gov.nameEn || gov.name_en }}</td>
+              <td class="text-gray-800 fw-bold">{{ gov.nameAr || gov.name_ar }}</td>
               <td>
                 <router-link
                   :to="{
@@ -87,40 +86,54 @@
                   class="badge badge-light-primary fw-bold text-hover-primary"
                 >
                   <KTIcon icon-name="geolocation" icon-class="fs-6 me-1" />
-                  {{ gov.areasCount ?? 0 }} {{ translate("Areas") }}
+                  {{ gov.areasCount ?? (gov.areas ? gov.areas.length : 0) }} {{ translate("Areas") }}
                 </router-link>
               </td>
               <td class="text-end">
-                <div class="d-flex justify-content-end flex-shrink-0">
-                  <router-link
-                    :to="{
-                      name: 'areas-listing',
-                      query: { governorateId: gov.id },
-                    }"
-                    class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1"
-                    :title="translate('View Areas')"
-                  >
-                    <KTIcon icon-name="eye" icon-class="fs-3" />
-                  </router-link>
+                <a
+                  href="#"
+                  class="btn btn-sm btn-light btn-active-light-primary btn-icon btn-color-gray-500"
+                  data-kt-menu-trigger="click"
+                  data-kt-menu-placement="bottom-end"
+                >
+                  <i class="bi bi-three-dots fs-4"></i>
+                </a>
+                <!--begin::Menu-->
+                <div
+                  class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-150px py-4"
+                  data-kt-menu="true"
+                >
 
-                  <button
-                    type="button"
-                    class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1"
-                    @click="openEditModal(gov)"
-                    :title="translate('Edit')"
-                  >
-                    <KTIcon icon-name="pencil" icon-class="fs-3" />
-                  </button>
-
-                  <button
-                    type="button"
-                    class="btn btn-icon btn-bg-light btn-active-color-danger btn-sm"
-                    @click="deleteGovernorate(gov)"
-                    :title="translate('Delete')"
-                  >
-                    <KTIcon icon-name="trash" icon-class="fs-3" />
-                  </button>
+                  <!--begin::Menu item-->
+                  <div class="menu-item px-3">
+                    <router-link
+                      :to="{
+                        name: 'governorate-edit',
+                        params: { id: gov.id },
+                      }"
+                      class="menu-link px-3 d-flex justify-content-between align-items-center"
+                    >
+                      <span>{{ translate("Edit") }}</span>
+                      <KTIcon
+                        icon-name="pencil"
+                        icon-class="fs-3 text-primary"
+                      />
+                    </router-link>
+                  </div>
+                  <!--end::Menu item-->
+                  <!--begin::Menu item-->
+                  <div class="menu-item px-3">
+                    <a
+                      @click="deleteGovernorate(gov)"
+                      class="menu-link px-3 d-flex justify-content-between align-items-center text-danger"
+                    >
+                      <span>{{ translate("Delete") }}</span>
+                      <KTIcon icon-name="trash" icon-class="fs-3 text-danger" />
+                    </a>
+                  </div>
+                  <!--end::Menu item-->
                 </div>
+                <!--end::Menu-->
               </td>
             </tr>
           </tbody>
@@ -139,95 +152,11 @@
         "
       />
     </div>
-
-    <!-- Modal Form -->
-    <div
-      class="modal fade"
-      id="kt_modal_governorate"
-      ref="governorateModalRef"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered mw-650px">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2 class="fw-bold">
-              {{
-                isEditing
-                  ? translate("Edit Governorate")
-                  : translate("Add Governorate")
-              }}
-            </h2>
-            <div
-              class="btn btn-icon btn-sm btn-active-icon-primary"
-              data-bs-dismiss="modal"
-              @click="closeModal()"
-            >
-              <KTIcon icon-name="cross" icon-class="fs-1" />
-            </div>
-          </div>
-
-          <form @submit.prevent="saveGovernorate()">
-            <div class="modal-body py-10 px-lg-17">
-              <!-- Name EN -->
-              <div class="fv-row mb-7">
-                <label class="required fs-6 fw-semibold mb-2">
-                  {{ translate("English Name") }}
-                </label>
-                <input
-                  type="text"
-                  class="form-control form-control-solid"
-                  v-model="form.nameEn"
-                  required
-                  :placeholder="translate('Enter English Name')"
-                />
-              </div>
-
-              <!-- Name AR -->
-              <div class="fv-row mb-7">
-                <label class="required fs-6 fw-semibold mb-2">
-                  {{ translate("Arabic Name") }}
-                </label>
-                <input
-                  type="text"
-                  class="form-control form-control-solid"
-                  v-model="form.nameAr"
-                  required
-                  :placeholder="translate('Enter Arabic Name')"
-                />
-              </div>
-            </div>
-
-            <div class="modal-footer flex-center">
-              <button
-                type="reset"
-                class="btn btn-light me-3"
-                data-bs-dismiss="modal"
-                @click="closeModal()"
-              >
-                {{ translate("Cancel") }}
-              </button>
-              <button type="submit" class="btn btn-primary" :disabled="saving">
-                <span class="indicator-label" v-if="!saving">
-                  {{ translate("Save") }}
-                </span>
-                <span class="indicator-progress d-block" v-else>
-                  {{ translate("Please wait...") }}
-                  <span
-                    class="spinner-border spinner-border-sm align-middle ms-2"
-                  ></span>
-                </span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, onMounted, onUpdated, nextTick } from "vue";
 import GovernorateService from "@/core/services/GovernorateService";
 import KTIcon from "@/core/helpers/kt-icon/KTIcon.vue";
 import KTPagination from "@/components/kt-datatable/KTPagination.vue";
@@ -238,7 +167,7 @@ import {
   showErrorAlert,
   showConfirmationAlert,
 } from "@/core/helpers/alert-utils";
-import { Modal } from "bootstrap";
+import { MenuComponent } from "@/assets/ts/components";
 
 export default defineComponent({
   name: "GovernorateList",
@@ -251,17 +180,7 @@ export default defineComponent({
     const governorates = ref<any[]>([]);
     const pagination = ref<any>({ currentPage: 1, totalPages: 1 });
     const loading = ref(false);
-    const saving = ref(false);
     const search = ref("");
-    const isEditing = ref(false);
-    const editingId = ref<number | null>(null);
-    const governorateModalRef = ref<null | HTMLElement>(null);
-    let modalInstance: Modal | null = null;
-
-    const form = ref({
-      nameEn: "",
-      nameAr: "",
-    });
 
     const fetchGovernorates = (page = 1) => {
       loading.value = true;
@@ -269,12 +188,18 @@ export default defineComponent({
         page,
         search: search.value,
       })
-        .then(({ data, meta }) => {
-          governorates.value = data || [];
-          pagination.value = meta || { currentPage: 1, totalPages: 1 };
+        .then((res: any) => {
+          governorates.value = res?.data || [];
+          pagination.value = res?.meta || { currentPage: 1, totalPages: 1 };
+        })
+        .catch(() => {
+          governorates.value = [];
         })
         .finally(() => {
           loading.value = false;
+          nextTick(() => {
+            MenuComponent.reinitialization();
+          });
         });
     };
 
@@ -286,65 +211,18 @@ export default defineComponent({
       }, 400);
     };
 
-    const openCreateModal = () => {
-      isEditing.value = false;
-      editingId.value = null;
-      form.value = { nameEn: "", nameAr: "" };
-      if (!modalInstance && governorateModalRef.value) {
-        modalInstance = new Modal(governorateModalRef.value);
-      }
-      modalInstance?.show();
-    };
-
-    const openEditModal = (gov: any) => {
-      isEditing.value = true;
-      editingId.value = gov.id;
-      form.value = {
-        nameEn: gov.nameEn,
-        nameAr: gov.nameAr,
-      };
-      if (!modalInstance && governorateModalRef.value) {
-        modalInstance = new Modal(governorateModalRef.value);
-      }
-      modalInstance?.show();
-    };
-
-    const closeModal = () => {
-      modalInstance?.hide();
-    };
-
-    const saveGovernorate = () => {
-      saving.value = true;
-      const action =
-        isEditing.value && editingId.value
-          ? GovernorateService.update(`${editingId.value}`, form.value)
-          : GovernorateService.create(form.value);
-
-      action
-        .then(() => {
-          closeModal();
-          showSuccessAlert(
-            isEditing.value
-              ? translate("Governorate updated successfully!")
-              : translate("Governorate created successfully!"),
-          );
-          fetchGovernorates(pagination.value.currentPage);
-        })
-        .catch(({ response }) => {
-          const error =
-            response?.data?.message || translate("An error occurred");
-          showErrorAlert(error);
-        })
-        .finally(() => {
-          saving.value = false;
-        });
-    };
-
     const deleteGovernorate = (gov: any) => {
+      if (gov.areasCount && gov.areasCount > 0) {
+        showErrorAlert(
+          translate(
+            "Cannot delete governorate because it has associated areas.",
+          ),
+        );
+        return;
+      }
+
       showConfirmationAlert(
-        translate(
-          "Are you sure you want to delete this governorate? All associated areas will be deleted as well.",
-        ),
+        translate("Are you sure you want to delete this governorate?"),
       ).then((result) => {
         if (result.isConfirmed) {
           GovernorateService.delete(gov.id)
@@ -363,28 +241,21 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      if (governorateModalRef.value) {
-        modalInstance = new Modal(governorateModalRef.value);
-      }
       fetchGovernorates();
+    });
+
+    onUpdated(() => {
+      MenuComponent.reinitialization();
     });
 
     return {
       governorates,
       pagination,
       loading,
-      saving,
       search,
-      form,
-      isEditing,
-      governorateModalRef,
       translate,
       fetchGovernorates,
       searchGovernorates,
-      openCreateModal,
-      openEditModal,
-      closeModal,
-      saveGovernorate,
       deleteGovernorate,
     };
   },

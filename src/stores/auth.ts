@@ -13,9 +13,9 @@ export interface User {
   role?: {
     id: number;
     name: string;
-    name_ar: string;
-    name_en: string;
-    is_system_role: boolean;
+    name_ar?: string;
+    name_en?: string;
+    isSuperAdmin?: boolean;
     permissions?: any; // Can be array or object
   };
   image?: string;
@@ -58,11 +58,15 @@ export const useAuthStore = defineStore("auth", () => {
     return ApiService.post("auth/sign-in", credentials)
       .then(({ data }) => {
         const payload = data.data;
+        const accessToken = payload.accessToken || payload.access_token;
+        const refreshToken = payload.refreshToken || payload.refresh_token;
         const authData = {
           ...payload.admin,
-          api_token: payload.access_token,
+          api_token: accessToken,
         };
-        JwtService.saveRefreshToken(payload.refresh_token);
+        if (refreshToken) {
+          JwtService.saveRefreshToken(refreshToken);
+        }
         setAuth(authData);
       })
       .catch(({ response }) => {
@@ -176,12 +180,15 @@ export const useAuthStore = defineStore("auth", () => {
     );
   });
 
+  const isSuperAdmin = computed(() => !!user.value?.role?.isSuperAdmin);
+
   return {
     errors,
     user,
     isAuthenticated,
     isLoading,
     isCompany,
+    isSuperAdmin,
     login,
     logout,
     register,

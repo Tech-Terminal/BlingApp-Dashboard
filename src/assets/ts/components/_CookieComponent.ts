@@ -10,7 +10,7 @@ export class CookieComponent {
     const matches = document.cookie.match(
       new RegExp(
         "(?:^|; )" +
-          name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, "\\EGP 1") +
+          name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, "\\$1") +
           "=([^;]*)",
       ),
     );

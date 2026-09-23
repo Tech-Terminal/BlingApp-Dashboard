@@ -35,6 +35,79 @@ const routes: Array<RouteRecordRaw> = [
       },
 
       {
+        path: "/clients/clients-listing",
+        name: "clients-listing",
+        component: () => import("@/views/apps/clients/ClientList.vue"),
+        meta: {
+          pageTitle: "Clients Listing",
+          breadcrumbs: ["Clients"],
+        },
+      },
+      {
+        path: "/clients/create",
+        name: "client-create",
+        component: () => import("@/views/apps/clients/ClientCreate.vue"),
+        meta: {
+          pageTitle: "Add Client",
+          breadcrumbs: ["Clients"],
+        },
+      },
+      {
+        path: "/clients/edit/:id",
+        name: "client-edit",
+        component: () => import("@/views/apps/clients/ClientEdit.vue"),
+        meta: {
+          pageTitle: "Edit Client",
+          breadcrumbs: ["Clients"],
+        },
+      },
+      {
+        path: "/clients/details/:id",
+        name: "client-details",
+        component: () => import("@/views/apps/clients/ClientDetails.vue"),
+        meta: {
+          pageTitle: "Client Details",
+          breadcrumbs: ["Clients", "Details"],
+        },
+      },
+      {
+        path: "/addresses/addresses-listing",
+        name: "addresses-listing",
+        component: () => import("@/views/apps/addresses/AddressList.vue"),
+        meta: {
+          pageTitle: "Addresses",
+          breadcrumbs: ["Addresses"],
+        },
+      },
+      {
+        path: "/addresses/create",
+        name: "address-create",
+        component: () => import("@/views/apps/addresses/AddressCreate.vue"),
+        meta: {
+          pageTitle: "Add Address",
+          breadcrumbs: ["Addresses"],
+        },
+      },
+      {
+        path: "/addresses/edit/:id",
+        name: "address-edit",
+        component: () => import("@/views/apps/addresses/AddressEdit.vue"),
+        meta: {
+          pageTitle: "Edit Address",
+          breadcrumbs: ["Addresses"],
+        },
+      },
+      {
+        path: "/addresses/details/:id",
+        name: "address-details",
+        component: () => import("@/views/apps/addresses/AddressDetails.vue"),
+        meta: {
+          pageTitle: "Address Details",
+          breadcrumbs: ["Addresses", "Address Details"],
+        },
+      },
+
+      {
         path: "/admins/admins-listing",
         name: "admins-listing",
         component: () => import("@/views/apps/admins/AdminList.vue"),
@@ -107,11 +180,51 @@ const routes: Array<RouteRecordRaw> = [
         },
       },
       {
+        path: "/locations/governorates/create",
+        name: "governorate-create",
+        component: () =>
+          import("@/views/apps/locations/governorates/GovernorateCreate.vue"),
+        meta: {
+          pageTitle: "Add Governorate",
+          breadcrumbs: ["Locations", "Governorates"],
+        },
+      },
+      {
+        path: "/locations/governorates/edit/:id",
+        name: "governorate-edit",
+        component: () =>
+          import("@/views/apps/locations/governorates/GovernorateEdit.vue"),
+        meta: {
+          pageTitle: "Edit Governorate",
+          breadcrumbs: ["Locations", "Governorates"],
+        },
+      },
+      {
         path: "/locations/areas",
         name: "areas-listing",
         component: () => import("@/views/apps/locations/AreaList.vue"),
         meta: {
           pageTitle: "Areas",
+          breadcrumbs: ["Locations", "Areas"],
+        },
+      },
+      {
+        path: "/locations/areas/create",
+        name: "area-create",
+        component: () =>
+          import("@/views/apps/locations/areas/AreaCreate.vue"),
+        meta: {
+          pageTitle: "Add Area",
+          breadcrumbs: ["Locations", "Areas"],
+        },
+      },
+      {
+        path: "/locations/areas/edit/:id",
+        name: "area-edit",
+        component: () =>
+          import("@/views/apps/locations/areas/AreaEdit.vue"),
+        meta: {
+          pageTitle: "Edit Area",
           breadcrumbs: ["Locations", "Areas"],
         },
       },

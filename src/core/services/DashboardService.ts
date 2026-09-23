@@ -8,7 +8,7 @@ class DashboardService {
    * Fetch dashboard statistics
    */
   public static getStatistics(): Promise<any> {
-    return ApiService.get("admin/statistics");
+    return ApiService.get("statistics");
   }
 }
 

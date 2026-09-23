@@ -2,10 +2,14 @@
   <!--begin::Filter-->
   <button
     type="button"
-    class="btn btn-light-primary me-3"
+    class="btn btn-light-primary me-3 position-relative"
     data-kt-menu-trigger="click"
     data-kt-menu-placement="bottom-end"
   >
+    <span
+      v-if="hasActiveFilters"
+      class="filter-active-indicator"
+    ></span>
     <KTIcon icon-name="filter" icon-class="fs-2" />
     {{ $translate("Filter") }}
   </button>
@@ -58,14 +62,40 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
 import KTIcon from "@/core/helpers/kt-icon/KTIcon.vue";
 
 export default defineComponent({
-  name: "filter-menu",
+  name: "FilterMenu",
   components: {
     KTIcon,
   },
+  props: {
+    filters: {
+      type: Object,
+      default: () => ({}),
+    },
+    active: {
+      type: Boolean,
+      default: false,
+    },
+  },
   emits: ["reset", "apply"],
+  setup(props) {
+    const hasActiveFilters = computed(() => {
+      if (props.active) return true;
+      return Object.values(props.filters || {}).some(
+        (v) =>
+          v !== null &&
+          v !== undefined &&
+          v !== "" &&
+          (!Array.isArray(v) || v.length > 0),
+      );
+    });
+
+    return {
+      hasActiveFilters,
+    };
+  },
 });
 </script>

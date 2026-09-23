@@ -259,6 +259,11 @@ export default defineComponent({
       try {
         const role = await RoleService.get(roleId);
         if (role) {
+          if (role.isSuperAdmin) {
+            showErrorAlert(translate("Super Admin role cannot be modified."));
+            router.push({ name: "roles-listing" });
+            return;
+          }
           formData.value.name = role.name;
           formData.value.permissions = [];
 
