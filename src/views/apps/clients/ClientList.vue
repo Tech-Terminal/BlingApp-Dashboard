@@ -23,10 +23,7 @@
 
       <!--begin::Card toolbar-->
       <div class="card-toolbar">
-        <router-link
-          :to="{ name: 'client-create' }"
-          class="btn btn-primary"
-        >
+        <router-link :to="{ name: 'client-create' }" class="btn btn-primary">
           <KTIcon icon-name="plus" icon-class="fs-2" />
           {{ translate("Add Client") }}
         </router-link>
@@ -78,44 +75,63 @@
                 <div class="d-flex align-items-center">
                   <!--begin::Avatar-->
                   <div
-                    class="symbol symbol-circle symbol-45px overflow-hidden me-3"
+                    class="symbol symbol-circle symbol-45px overflow-hidden me-3 flex-shrink-0"
+                    style="width: 45px; height: 45px; min-width: 45px"
                   >
                     <img
                       :src="client.image"
                       :alt="client.name"
-                      class="w-100"
+                      style="width: 45px; height: 45px; object-fit: cover"
                       v-if="client.image"
                     />
                     <span
                       v-else
                       class="symbol-label bg-light-primary text-primary fs-5 fw-bold"
+                      style="width: 45px; height: 45px"
                     >
-                      {{ client.name ? client.name.charAt(0).toUpperCase() : "C" }}
+                      {{
+                        client.name ? client.name.charAt(0).toUpperCase() : "C"
+                      }}
                     </span>
                   </div>
                   <!--end::Avatar-->
                   <!--begin::Details-->
                   <div class="d-flex flex-column">
                     <router-link
-                      :to="{ name: 'client-details', params: { id: client.id } }"
+                      :to="{
+                        name: 'client-details',
+                        params: { id: client.id },
+                      }"
                       class="text-gray-800 text-hover-primary fw-bold mb-1"
                     >
                       {{ client.name }}
                     </router-link>
-                    <span class="text-muted fs-7">{{ client.email || translate("No Email") }}</span>
+                    <span class="text-muted fs-7">{{
+                      client.email || translate("No Email")
+                    }}</span>
                   </div>
                   <!--end::Details-->
                 </div>
               </td>
               <td>
-                <span class="text-gray-800 fw-bold font-monospace">{{ client.phone }}</span>
+                <span class="text-gray-800 fw-bold font-monospace">{{
+                  client.phone
+                }}</span>
               </td>
               <td>
                 <span
                   class="badge fw-bold"
-                  :class="client.isActive ? 'badge-light-success' : 'badge-light-danger'"
+                  :class="
+                    client.isActive
+                      ? 'badge-light-success'
+                      : 'badge-light-danger'
+                  "
                 >
-                  {{ client.isActive ? translate("Active") : translate("Inactive") }}
+                  {{
+                    client.isActive
+                      ? translate("Active")
+                      : translate("Inactive")
+                  }}
                 </span>
               </td>
 
@@ -139,14 +155,14 @@
                   <!--begin::Menu item-->
                   <div class="menu-item px-3">
                     <router-link
-                      :to="{ name: 'client-details', params: { id: client.id } }"
+                      :to="{
+                        name: 'client-details',
+                        params: { id: client.id },
+                      }"
                       class="menu-link px-3 d-flex justify-content-between align-items-center"
                     >
                       <span>{{ translate("View Details") }}</span>
-                      <KTIcon
-                        icon-name="eye"
-                        icon-class="fs-3 text-primary"
-                      />
+                      <KTIcon icon-name="eye" icon-class="fs-3 text-primary" />
                     </router-link>
                   </div>
                   <!--end::Menu item-->
@@ -157,10 +173,7 @@
                       class="menu-link px-3 d-flex justify-content-between align-items-center"
                     >
                       <span>{{ translate("Edit Client") }}</span>
-                      <KTIcon
-                        icon-name="pencil"
-                        icon-class="fs-3 text-info"
-                      />
+                      <KTIcon icon-name="pencil" icon-class="fs-3 text-info" />
                     </router-link>
                   </div>
                   <!--end::Menu item-->
@@ -171,10 +184,20 @@
                       class="menu-link px-3 d-flex justify-content-between align-items-center"
                       :class="client.isActive ? 'text-warning' : 'text-success'"
                     >
-                      <span>{{ client.isActive ? translate("Deactivate") : translate("Activate") }}</span>
+                      <span>{{
+                        client.isActive
+                          ? translate("Deactivate")
+                          : translate("Activate")
+                      }}</span>
                       <KTIcon
-                        :icon-name="client.isActive ? 'cross-circle' : 'check-circle'"
-                        :icon-class="client.isActive ? 'fs-3 text-warning' : 'fs-3 text-success'"
+                        :icon-name="
+                          client.isActive ? 'cross-circle' : 'check-circle'
+                        "
+                        :icon-class="
+                          client.isActive
+                            ? 'fs-3 text-warning'
+                            : 'fs-3 text-success'
+                        "
                       />
                     </a>
                   </div>
@@ -259,7 +282,8 @@ export default defineComponent({
         })
         .catch((error) => {
           showErrorAlert(
-            error?.response?.data?.message || translate("Failed to fetch clients"),
+            error?.response?.data?.message ||
+              translate("Failed to fetch clients"),
           );
         })
         .finally(() => {
@@ -304,7 +328,8 @@ export default defineComponent({
             })
             .catch((error) => {
               showErrorAlert(
-                error?.response?.data?.message || translate("Failed to update status"),
+                error?.response?.data?.message ||
+                  translate("Failed to update status"),
               );
             });
         }
@@ -328,7 +353,8 @@ export default defineComponent({
             })
             .catch((error) => {
               showErrorAlert(
-                error?.response?.data?.message || translate("Failed to delete client"),
+                error?.response?.data?.message ||
+                  translate("Failed to delete client"),
               );
             });
         }

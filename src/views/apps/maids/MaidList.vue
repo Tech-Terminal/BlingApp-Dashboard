@@ -12,9 +12,9 @@
           <input
             type="text"
             v-model="search"
-            @input="searchAdmins()"
+            @input="searchMaids()"
             class="form-control form-control-solid w-100 w-md-250px ps-15"
-            :placeholder="translate('Search Admins')"
+            :placeholder="translate('Search Maids')"
           />
         </div>
         <!--end::Search-->
@@ -36,20 +36,6 @@
             <!--begin::Input group-->
             <div class="mb-10">
               <label class="form-label fs-6 fw-semibold"
-                >{{ translate("Role") }}:</label
-              >
-              <SearchableSelect
-                v-model="filters.roleId"
-                :service="RoleService"
-                label="name"
-                :placeholder="translate('Select Role')"
-              />
-            </div>
-            <!--end::Input group-->
-
-            <!--begin::Input group-->
-            <div class="mb-10">
-              <label class="form-label fs-6 fw-semibold"
                 >{{ translate("Status") }}:</label
               >
               <SearchableSelect
@@ -62,12 +48,16 @@
             <!--end::Input group-->
           </FilterMenu>
 
-          <!--begin::Add admin-->
-          <router-link :to="{ name: 'admin-create' }" class="btn btn-primary">
+          <!--begin::Add maid-->
+          <router-link
+            v-if="can('create', 'maid')"
+            :to="{ name: 'maid-create' }"
+            class="btn btn-primary"
+          >
             <KTIcon icon-name="plus" icon-class="fs-2" />
-            {{ translate("Add Admin") }}
+            {{ translate("Add Maid") }}
           </router-link>
-          <!--end::Add admin-->
+          <!--end::Add maid-->
         </div>
         <!--end::Toolbar-->
       </div>
@@ -84,11 +74,11 @@
         </div>
       </div>
 
-      <div v-else-if="!loading && (!admins || admins.length === 0)">
+      <div v-else-if="!loading && (!maids || maids.length === 0)">
         <EmptyState
-          :title="translate('No Admins Found')"
+          :title="translate('No Maids Found')"
           :description="
-            translate('Try adjusting your search or add a new admin.')
+            translate('Try adjusting your search or add a new maid.')
           "
           icon="magnifier"
         />
@@ -97,7 +87,7 @@
       <div v-else class="table-responsive">
         <table
           class="table align-middle table-row-dashed fs-6 gy-5"
-          id="kt_admins_table"
+          id="kt_maids_table"
         >
           <thead>
             <tr
@@ -105,15 +95,16 @@
             >
               <th class="min-w-50px">ID</th>
               <th class="min-w-250px">{{ translate("Details") }}</th>
-              <th class="min-w-125px">{{ translate("Role") }}</th>
+              <th class="min-w-125px">{{ translate("Phone") }}</th>
+              <th class="min-w-125px">{{ translate("Document") }}</th>
               <th class="min-w-100px">{{ translate("Status") }}</th>
               <th class="min-w-125px">{{ translate("Joined Date") }}</th>
               <th class="text-end min-w-70px">{{ translate("Actions") }}</th>
             </tr>
           </thead>
           <tbody class="fw-semibold text-gray-600">
-            <tr v-for="admin in admins" :key="admin.id">
-              <td>{{ admin.id }}</td>
+            <tr v-for="maid in maids" :key="maid.id">
+              <td>{{ maid.id }}</td>
               <td>
                 <div class="d-flex align-items-center">
                   <!--begin:: Avatar -->
@@ -122,45 +113,58 @@
                     style="width: 50px; height: 50px; min-width: 50px"
                   >
                     <img
-                      :src="admin.image"
-                      :alt="admin.name"
+                      :src="maid.image"
+                      :alt="maid.name"
                       style="width: 50px; height: 50px; object-fit: cover"
-                      v-if="admin.image"
+                      v-if="maid.image"
                     />
                     <span
                       v-else
                       class="symbol-label bg-light-primary text-primary fs-3 fw-bold"
                       style="width: 50px; height: 50px"
                     >
-                      {{
-                        admin.name ? admin.name.charAt(0).toUpperCase() : "A"
-                      }}
+                      {{ maid.name ? maid.name.charAt(0).toUpperCase() : "M" }}
                     </span>
                   </div>
                   <!--end::Avatar-->
-                  <!--begin::User details-->
+                  <!--begin::Maid details-->
                   <div class="d-flex flex-column">
-                    <span class="text-gray-800 text-hover-primary mb-1">{{
-                      admin.name
+                    <router-link
+                      :to="{ name: 'maid-details', params: { id: maid.id } }"
+                      class="text-gray-800 text-hover-primary mb-1 fw-bold"
+                    >
+                      {{ maid.name }}
+                    </router-link>
+                    <span class="text-muted fs-7">{{
+                      maid.email || translate("No Email")
                     }}</span>
-                    <span>{{ admin.email }}</span>
-                    <span>{{ admin.phone }}</span>
                   </div>
-                  <!--begin::User details-->
+                  <!--begin::Maid details-->
                 </div>
               </td>
               <td>
-                <span v-if="admin.role" class="badge badge-light-primary">{{
-                  admin.role.name
+                <span class="text-gray-800 fw-bold font-monospace" dir="ltr">{{
+                  maid.phone
                 }}</span>
-                <span v-else class="badge badge-light-warning">{{
-                  translate("No Role")
+              </td>
+              <td>
+                <a
+                  v-if="maid.idDocument"
+                  :href="maid.idDocument"
+                  target="_blank"
+                  class="badge badge-light-primary text-hover-primary fw-semibold py-2 px-3 d-inline-flex align-items-center gap-1"
+                >
+                  <i class="bi bi-file-earmark-text fs-6"></i>
+                  <span>{{ translate("View") }}</span>
+                </a>
+                <span v-else class="text-muted fs-7">{{
+                  translate("N/A")
                 }}</span>
               </td>
               <td>
                 <div
                   class="badge badge-light-success fw-bold"
-                  v-if="admin.isActive"
+                  v-if="maid.isActive"
                 >
                   {{ translate("Active") }}
                 </div>
@@ -170,8 +174,8 @@
               </td>
               <td>
                 {{
-                  admin.createdAt
-                    ? new Date(admin.createdAt).toLocaleDateString()
+                  maid.createdAt
+                    ? new Date(maid.createdAt).toLocaleDateString()
                     : "N/A"
                 }}
               </td>
@@ -192,7 +196,18 @@
                   <!--begin::Menu item-->
                   <div class="menu-item px-3">
                     <router-link
-                      :to="{ name: 'admin-edit', params: { id: admin.id } }"
+                      :to="{ name: 'maid-details', params: { id: maid.id } }"
+                      class="menu-link px-3 d-flex justify-content-between align-items-center"
+                    >
+                      <span>{{ translate("View") }}</span>
+                      <KTIcon icon-name="eye" icon-class="fs-3 text-primary" />
+                    </router-link>
+                  </div>
+                  <!--end::Menu item-->
+                  <!--begin::Menu item-->
+                  <div class="menu-item px-3" v-if="can('update', 'maid')">
+                    <router-link
+                      :to="{ name: 'maid-edit', params: { id: maid.id } }"
                       class="menu-link px-3 d-flex justify-content-between align-items-center"
                     >
                       <span>{{ translate("Edit") }}</span>
@@ -204,9 +219,9 @@
                   </div>
                   <!--end::Menu item-->
                   <!--begin::Menu item-->
-                  <div class="menu-item px-3">
+                  <div class="menu-item px-3" v-if="can('delete', 'maid')">
                     <a
-                      @click="deleteAdmin(admin)"
+                      @click="deleteMaid(maid)"
                       class="menu-link px-3 d-flex justify-content-between align-items-center text-danger"
                     >
                       <span>{{ translate("Delete") }}</span>
@@ -229,7 +244,7 @@
         @page-change="
           (page: number) => {
             pagination.currentPage = page;
-            fetchAdmins(page);
+            fetchMaids(page);
           }
         "
       />
@@ -246,10 +261,8 @@ import {
   onUpdated,
   computed,
 } from "vue";
-import AdminService from "@/core/services/AdminService";
-import RoleService from "@/core/services/RoleService";
-import { useAuthStore } from "@/stores/auth";
-import { storeToRefs } from "pinia";
+import MaidService from "@/core/services/MaidService";
+import type { MaidData } from "@/core/types";
 import KTIcon from "@/core/helpers/kt-icon/KTIcon.vue";
 import KTPagination from "@/components/kt-datatable/KTPagination.vue";
 import SearchableSelect from "@/components/inputs/SearchableSelect.vue";
@@ -262,9 +275,10 @@ import {
   showConfirmationAlert,
 } from "@/core/helpers/alert-utils";
 import { MenuComponent } from "@/assets/ts/components";
+import { usePermissions } from "@/composables/usePermissions";
 
 export default defineComponent({
-  name: "AdminList",
+  name: "MaidList",
   components: {
     KTIcon,
     KTPagination,
@@ -273,10 +287,11 @@ export default defineComponent({
     EmptyState,
   },
   setup() {
-    const admins = ref([]);
+    const maids = ref<MaidData[]>([]);
     const pagination = ref<any>({});
     const loading = ref(false);
     const search = ref("");
+    const { can } = usePermissions();
 
     const statusOptions = computed(() => [
       { id: null, name: translate("All") },
@@ -284,28 +299,29 @@ export default defineComponent({
       { id: false, name: translate("Inactive") },
     ]);
 
-    const authStore = useAuthStore();
-    const { isCompany, user } = storeToRefs(authStore);
-
     const filters = ref<any>({
-      roleId: null,
       isActive: null,
     });
 
-    const fetchAdmins = (page = 1) => {
+    const fetchMaids = (page = 1) => {
       loading.value = true;
-      AdminService.getAll({
+      MaidService.getAll({
         page: page,
         search: search.value,
         filters: filters.value,
       })
-        .then(({ data, meta }) => {
-          admins.value = data || [];
+        .then(({ data, meta }: any) => {
+          maids.value = data || [];
           pagination.value = meta || { currentPage: 1, totalPages: 1 };
-          // Re-init menu
           nextTick(() => {
             MenuComponent.reinitialization();
           });
+        })
+        .catch((error) => {
+          showErrorAlert(
+            error?.response?.data?.message ||
+              translate("Failed to fetch maids"),
+          );
         })
         .finally(() => {
           loading.value = false;
@@ -313,30 +329,29 @@ export default defineComponent({
     };
 
     const applyFilter = () => {
-      fetchAdmins(1);
+      fetchMaids(1);
     };
 
     const resetFilter = () => {
       filters.value = {
-        roleId: null,
         isActive: null,
       };
-      fetchAdmins(1);
+      fetchMaids(1);
     };
 
-    const deleteAdmin = (admin: any) => {
+    const deleteMaid = (maid: any) => {
       showConfirmationAlert(
-        translate("Are you sure you want to delete this admin?"),
+        translate("Are you sure you want to delete this maid?"),
       ).then((result) => {
         if (result.isConfirmed) {
-          AdminService.delete(admin.id)
+          MaidService.delete(maid.id)
             .then(() => {
-              showSuccessAlert(translate("Admin deleted successfully!"));
-              fetchAdmins(pagination.value.current_page);
+              showSuccessAlert(translate("Maid deleted successfully."));
+              fetchMaids(pagination.value.currentPage || 1);
             })
             .catch(({ response }) => {
               const error =
-                response.data.message || translate("Error deleting admin");
+                response?.data?.message || translate("Failed to delete maid");
               showErrorAlert(error);
             });
         }
@@ -344,15 +359,15 @@ export default defineComponent({
     };
 
     let timer: any;
-    const searchAdmins = () => {
+    const searchMaids = () => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        fetchAdmins();
+        fetchMaids();
       }, 500);
     };
 
     onMounted(() => {
-      fetchAdmins();
+      fetchMaids();
     });
 
     onUpdated(() => {
@@ -360,19 +375,19 @@ export default defineComponent({
     });
 
     return {
-      admins,
+      maids,
       pagination,
       loading,
       search,
       translate,
-      fetchAdmins,
-      deleteAdmin,
-      searchAdmins,
+      fetchMaids,
+      deleteMaid,
+      searchMaids,
       filters,
       statusOptions,
-      RoleService,
       applyFilter,
       resetFilter,
+      can,
     };
   },
 });

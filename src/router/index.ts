@@ -108,6 +108,43 @@ const routes: Array<RouteRecordRaw> = [
       },
 
       {
+        path: "/maids/maids-listing",
+        name: "maids-listing",
+        component: () => import("@/views/apps/maids/MaidList.vue"),
+        meta: {
+          pageTitle: "Maids",
+          breadcrumbs: ["Maids"],
+        },
+      },
+      {
+        path: "/maids/create",
+        name: "maid-create",
+        component: () => import("@/views/apps/maids/MaidCreate.vue"),
+        meta: {
+          pageTitle: "Add Maid",
+          breadcrumbs: ["Maids"],
+        },
+      },
+      {
+        path: "/maids/edit/:id",
+        name: "maid-edit",
+        component: () => import("@/views/apps/maids/MaidEdit.vue"),
+        meta: {
+          pageTitle: "Edit Maid",
+          breadcrumbs: ["Maids"],
+        },
+      },
+      {
+        path: "/maids/details/:id",
+        name: "maid-details",
+        component: () => import("@/views/apps/maids/MaidDetails.vue"),
+        meta: {
+          pageTitle: "Maid Details",
+          breadcrumbs: ["Maids", "Maid Details"],
+        },
+      },
+
+      {
         path: "/admins/admins-listing",
         name: "admins-listing",
         component: () => import("@/views/apps/admins/AdminList.vue"),
@@ -211,8 +248,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/locations/areas/create",
         name: "area-create",
-        component: () =>
-          import("@/views/apps/locations/areas/AreaCreate.vue"),
+        component: () => import("@/views/apps/locations/areas/AreaCreate.vue"),
         meta: {
           pageTitle: "Add Area",
           breadcrumbs: ["Locations", "Areas"],
@@ -221,8 +257,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/locations/areas/edit/:id",
         name: "area-edit",
-        component: () =>
-          import("@/views/apps/locations/areas/AreaEdit.vue"),
+        component: () => import("@/views/apps/locations/areas/AreaEdit.vue"),
         meta: {
           pageTitle: "Edit Area",
           breadcrumbs: ["Locations", "Areas"],

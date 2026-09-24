@@ -30,6 +30,13 @@ const MainMenuConfig: Array<MenuItem> = [
         bootstrapIcon: "bi-geo-alt",
         permission: "address",
       },
+      {
+        heading: "maids",
+        route: "/maids/maids-listing",
+        keenthemesIcon: "user",
+        bootstrapIcon: "bi-person-heart",
+        permission: "maid",
+      },
     ],
   },
 
