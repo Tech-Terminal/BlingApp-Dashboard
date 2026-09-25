@@ -200,6 +200,52 @@
             </div>
           </div>
         </div>
+
+        <div class="row g-4 mt-1 pt-4 border-top border-gray-200">
+          <!-- Pick Up Point -->
+          <div class="col-sm-6 col-lg-4 d-flex align-items-center gap-3">
+            <div
+              class="symbol symbol-40px symbol-circle bg-light-info text-info d-flex align-items-center justify-content-center"
+            >
+              <i class="bi bi-geo-alt-fill fs-3 text-info"></i>
+            </div>
+            <div>
+              <div class="text-muted fs-8 fw-semibold text-uppercase">
+                {{ translate("Pick Up Point") }}
+              </div>
+              <div class="mt-1">
+                <router-link
+                  v-if="maid.pickupPoint"
+                  :to="{ name: 'pickup-point-details', params: { id: maid.pickupPoint.id } }"
+                  class="badge badge-light-primary text-primary fw-bold fs-7 d-inline-flex align-items-center gap-1"
+                >
+                  <i class="bi bi-geo-alt fs-8"></i>
+                  <span>{{ maid.pickupPoint.label }}</span>
+                </router-link>
+                <span v-else class="badge badge-light text-muted fs-8">
+                  {{ translate("Not Assigned") }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Joined Date -->
+          <div class="col-sm-6 col-lg-4 d-flex align-items-center gap-3">
+            <div
+              class="symbol symbol-40px symbol-circle bg-light-secondary text-gray-600 d-flex align-items-center justify-content-center"
+            >
+              <i class="bi bi-calendar3 fs-3 text-gray-600"></i>
+            </div>
+            <div>
+              <div class="text-muted fs-8 fw-semibold text-uppercase">
+                {{ translate("Joined Date") }}
+              </div>
+              <div class="text-gray-800 fw-bold fs-6">
+                {{ maid.createdAt ? new Date(maid.createdAt).toLocaleDateString() : "N/A" }}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

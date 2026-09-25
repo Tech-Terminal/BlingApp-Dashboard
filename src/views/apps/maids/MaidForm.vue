@@ -93,6 +93,34 @@
       </div>
     </div>
 
+    <!-- Row 3: Pick Up Point -->
+    <div class="row">
+      <div class="col-md-6 d-flex flex-column mb-7 fv-row">
+        <label
+          class="d-flex align-items-center fs-6 fw-semibold form-label mb-2"
+        >
+          <span>{{ translate("Pick Up Point") }}</span>
+        </label>
+        <SearchableSelect
+          v-model="formData.pickupPointId"
+          :service="PickupPointService"
+          label="label"
+          :placeholder="translate('Select Pick Up Point')"
+          :initialOption="initialPickupPoint"
+          :class="{ 'is-invalid': apiValidation.hasError('pickupPointId') }"
+        />
+        <div class="text-muted fs-8 mt-1">
+          {{ translate("Each maid will be attached to a single pickup point.") }}
+        </div>
+        <div
+          class="invalid-feedback d-block"
+          v-if="apiValidation.hasError('pickupPointId')"
+        >
+          {{ apiValidation.getError("pickupPointId") }}
+        </div>
+      </div>
+    </div>
+
     <!-- Actions -->
     <div class="text-center pt-15">
       <button type="button" class="btn btn-light me-3" @click="$emit('cancel')">
@@ -123,12 +151,15 @@ import { defineComponent, ref, computed, PropType } from "vue";
 import { translate } from "@/core/helpers/i18n-utils";
 import ImageUpload from "@/components/ImageUpload.vue";
 import CustomFileUploader from "@/components/inputs/CustomFileUploader.vue";
+import SearchableSelect from "@/components/inputs/SearchableSelect.vue";
+import PickupPointService from "@/core/services/PickupPointService";
 
 export default defineComponent({
   name: "MaidForm",
   components: {
     ImageUpload,
     CustomFileUploader,
+    SearchableSelect,
   },
   props: {
     modelValue: {
@@ -142,6 +173,10 @@ export default defineComponent({
     isEdit: {
       type: Boolean,
       default: false,
+    },
+    initialPickupPoint: {
+      type: Object,
+      default: null,
     },
     apiValidation: {
       type: Object as PropType<{
@@ -166,6 +201,7 @@ export default defineComponent({
         name: formData.value.name?.trim(),
         phone: formData.value.phone?.trim(),
         isActive: Boolean(formData.value.isActive),
+        pickupPointId: formData.value.pickupPointId || null,
       };
 
       if (formData.value.email?.trim()) {
@@ -193,6 +229,7 @@ export default defineComponent({
       formData,
       isUploading,
       isUploadingDoc,
+      PickupPointService,
       submit,
       translate,
     };

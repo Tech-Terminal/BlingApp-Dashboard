@@ -15,6 +15,7 @@
         v-model="form"
         :loading="loading"
         :is-edit="true"
+        :initialPickupPoint="initialPickupPoint"
         :apiValidation="validation"
         @submit="updateMaid"
         @cancel="discard"
@@ -46,6 +47,7 @@ export default defineComponent({
 
     const loading = ref(false);
     const loadingData = ref(true);
+    const initialPickupPoint = ref<any>(null);
     const form = ref({
       name: "",
       email: "",
@@ -53,6 +55,7 @@ export default defineComponent({
       image: "",
       idDocument: "",
       isActive: true,
+      pickupPointId: null as number | null,
     });
 
     const validation = useApiValidation();
@@ -68,7 +71,11 @@ export default defineComponent({
               image: maid.image || "",
               idDocument: maid.idDocument || "",
               isActive: maid.isActive ?? true,
+              pickupPointId: maid.pickupPointId || null,
             };
+            if (maid.pickupPoint) {
+              initialPickupPoint.value = maid.pickupPoint;
+            }
           }
         })
         .catch((error) => {

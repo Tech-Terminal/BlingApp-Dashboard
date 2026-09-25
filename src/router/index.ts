@@ -145,6 +145,47 @@ const routes: Array<RouteRecordRaw> = [
       },
 
       {
+        path: "/pickup-points/pickup-points-listing",
+        name: "pickup-points-listing",
+        component: () =>
+          import("@/views/apps/pickup-points/PickupPointList.vue"),
+        meta: {
+          pageTitle: "Pick Up Points",
+          breadcrumbs: ["Pick Up Points"],
+        },
+      },
+      {
+        path: "/pickup-points/create",
+        name: "pickup-point-create",
+        component: () =>
+          import("@/views/apps/pickup-points/PickupPointCreate.vue"),
+        meta: {
+          pageTitle: "Add Pick Up Point",
+          breadcrumbs: ["Pick Up Points"],
+        },
+      },
+      {
+        path: "/pickup-points/edit/:id",
+        name: "pickup-point-edit",
+        component: () =>
+          import("@/views/apps/pickup-points/PickupPointEdit.vue"),
+        meta: {
+          pageTitle: "Edit Pick Up Point",
+          breadcrumbs: ["Pick Up Points"],
+        },
+      },
+      {
+        path: "/pickup-points/details/:id",
+        name: "pickup-point-details",
+        component: () =>
+          import("@/views/apps/pickup-points/PickupPointDetails.vue"),
+        meta: {
+          pageTitle: "Pick Up Point Details",
+          breadcrumbs: ["Pick Up Points", "Details"],
+        },
+      },
+
+      {
         path: "/admins/admins-listing",
         name: "admins-listing",
         component: () => import("@/views/apps/admins/AdminList.vue"),

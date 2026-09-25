@@ -6,6 +6,8 @@ export interface MaidData {
   image?: string;
   idDocument?: string;
   isActive: boolean;
+  pickupPointId?: number;
+  pickupPoint?: any;
   createdAt: string;
   updatedAt?: string;
 }

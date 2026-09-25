@@ -37,6 +37,13 @@ const MainMenuConfig: Array<MenuItem> = [
         bootstrapIcon: "bi-person-heart",
         permission: "maid",
       },
+      {
+        heading: "pickup-points",
+        route: "/pickup-points/pickup-points-listing",
+        keenthemesIcon: "geolocation",
+        bootstrapIcon: "bi-geo-alt-fill",
+        permission: "pickup_point",
+      },
     ],
   },
 

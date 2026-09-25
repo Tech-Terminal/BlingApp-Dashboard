@@ -42,6 +42,7 @@ export default defineComponent({
       image: "",
       idDocument: "",
       isActive: true,
+      pickupPointId: null,
     });
 
     const validation = useApiValidation();

@@ -135,9 +135,20 @@
                     >
                       {{ maid.name }}
                     </router-link>
-                    <span class="text-muted fs-7">{{
-                      maid.email || translate("No Email")
-                    }}</span>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="text-muted fs-7">{{
+                        maid.email || translate("No Email")
+                      }}</span>
+                      <router-link
+                        v-if="maid.pickupPoint"
+                        :to="{ name: 'pickup-point-details', params: { id: maid.pickupPoint.id } }"
+                        class="badge badge-light-primary text-primary fw-semibold fs-9 py-1 px-2"
+                        @click.stop
+                      >
+                        <i class="bi bi-geo-alt-fill fs-9 me-1"></i>
+                        {{ maid.pickupPoint.label }}
+                      </router-link>
+                    </div>
                   </div>
                   <!--begin::Maid details-->
                 </div>
