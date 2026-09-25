@@ -89,13 +89,13 @@
               <div class="d-flex flex-wrap flex-stack">
                 <div class="d-flex flex-column flex-grow-1 pe-8">
                   <div class="d-flex flex-wrap gap-4">
-                    <!-- Coverage Radius -->
+                    <!-- Covered Areas -->
                     <div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 mb-3">
                       <div class="d-flex align-items-center">
-                        <i class="bi bi-broadcast text-info fs-3 me-2"></i>
-                        <div class="fs-4 fw-bold">{{ pickupPoint.distance || 5 }} KM</div>
+                        <i class="bi bi-geo-alt-fill text-info fs-3 me-2"></i>
+                        <div class="fs-4 fw-bold">{{ (pickupPoint.areas || []).length }}</div>
                       </div>
-                      <div class="fw-semibold fs-7 text-gray-500">{{ translate("Coverage Radius") }}</div>
+                      <div class="fw-semibold fs-7 text-gray-500">{{ translate("Covered Areas") }}</div>
                     </div>
 
                     <!-- Assigned Maids Count -->
@@ -107,25 +107,6 @@
                       <div class="fw-semibold fs-7 text-gray-500">{{ translate("Assigned Maids") }}</div>
                     </div>
 
-                    <!-- Coordinates -->
-                    <div class="border border-gray-300 border-dashed rounded min-w-175px py-3 px-4 mb-3" v-if="pickupPoint.lat && pickupPoint.long">
-                      <div class="d-flex align-items-center">
-                        <i class="bi bi-crosshair text-primary fs-3 me-2"></i>
-                        <div class="fs-7 fw-bold font-monospace">
-                          {{ Number(pickupPoint.lat).toFixed(4) }}, {{ Number(pickupPoint.long).toFixed(4) }}
-                        </div>
-                      </div>
-                      <div class="fw-semibold fs-7 text-gray-500">
-                        <a
-                          :href="`https://www.google.com/maps?q=${pickupPoint.lat},${pickupPoint.long}`"
-                          target="_blank"
-                          class="text-primary text-hover-underline d-inline-flex align-items-center"
-                        >
-                          <span>{{ translate("Open in Maps") }}</span>
-                          <i class="bi bi-box-arrow-up-right fs-9 ms-1"></i>
-                        </a>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -134,58 +115,94 @@
         </div>
       </div>
 
-      <!-- Main Layout: Map & Assigned Maids -->
-      <div class="row g-6">
-        <!-- Interactive Coverage Map -->
-        <div class="col-xl-6">
-          <div class="card card-flush h-100">
-            <div class="card-header pt-6">
-              <h3 class="card-title align-items-start flex-column">
-                <span class="card-label fw-bold fs-4 text-gray-800">
-                  <i class="bi bi-map-fill text-primary me-2"></i>
-                  {{ translate("Coverage Area & Radius") }}
-                </span>
-                <span class="text-muted fs-7">
-                  {{ translate("Visual zone representing the pickup center and service range") }}
-                </span>
-              </h3>
-            </div>
-            <div class="card-body pt-0">
-              <div
-                ref="mapContainer"
-                class="rounded border border-gray-300 shadow-sm position-relative overflow-hidden"
-                style="height: 400px; width: 100%;"
-              >
-                <div
-                  v-if="mapLoading"
-                  class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75 z-index-2"
-                >
-                  <div class="spinner-border text-primary" role="status"></div>
-                </div>
-              </div>
-
-              <div class="d-flex justify-content-between align-items-center mt-3 text-muted fs-7">
-                <span>
-                  <i class="bi bi-circle-fill text-primary fs-9 me-1"></i>
-                  {{ translate("Radius:") }} {{ pickupPoint.distance || 5 }} KM ({{ ((pickupPoint.distance || 5) * 1000).toLocaleString() }} {{ translate("meters") }})
-                </span>
-                <span class="badge badge-light-primary font-monospace" v-if="pickupPoint.lat && pickupPoint.long">
-                  {{ pickupPoint.lat }}, {{ pickupPoint.long }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Assigned Maids List -->
+      <!-- Main Layout: Covered Areas & Attached Maids side by side -->
+      <div class="row g-6 mb-6">
+        <!-- Covered Areas by Governorate -->
         <div class="col-xl-6">
           <div class="card card-flush h-100">
             <div class="card-header pt-6">
               <div class="card-title">
                 <h3 class="card-label fw-bold fs-4 text-gray-800 mb-0">
-                  <i class="bi bi-person-hearts text-danger me-2"></i>
-                  {{ translate("Attached Maids") }}
+                  <i class="bi bi-pin-map-fill text-primary me-2"></i>
+                  {{ translate("Covered Areas") }}
                   <span class="badge badge-light-primary ms-2 fs-7">
+                    {{ (pickupPoint.areas || []).length }}
+                  </span>
+                </h3>
+              </div>
+              <div class="card-toolbar" v-if="can('update', 'pickup_point')">
+                <router-link
+                  :to="{ name: 'pickup-point-edit', params: { id: pickupPoint.id } }"
+                  class="btn btn-sm btn-light-primary fw-bold"
+                >
+                  <i class="bi bi-pencil-square me-1"></i>
+                  {{ translate("Manage Areas") }}
+                </router-link>
+              </div>
+            </div>
+
+            <div class="card-body pt-2">
+              <div v-if="!pickupPoint.areas || pickupPoint.areas.length === 0" class="text-center py-10">
+                <div
+                  class="symbol symbol-60px symbol-circle bg-light-warning mx-auto mb-4 d-flex align-items-center justify-content-center"
+                  style="width: 60px; height: 60px;"
+                >
+                  <i class="bi bi-geo-alt text-warning fs-2x"></i>
+                </div>
+                <h5 class="text-gray-800 fw-bold">{{ translate("No areas covered yet.") }}</h5>
+                <p class="text-muted fs-7 mb-4">
+                  {{ translate("No covered areas assigned to this pickup point yet.") }}
+                </p>
+                <router-link
+                  v-if="can('update', 'pickup_point')"
+                  :to="{ name: 'pickup-point-edit', params: { id: pickupPoint.id } }"
+                  class="btn btn-sm btn-primary"
+                >
+                  {{ translate("Assign Areas") }}
+                </router-link>
+              </div>
+
+              <div v-else class="d-flex flex-column gap-5" style="max-height: 420px; overflow-y: auto;">
+                <div
+                  v-for="group in groupedAreas"
+                  :key="group.id ?? group.name"
+                  class="p-4 rounded border border-gray-200 bg-light-subtle"
+                >
+                  <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-gray-200">
+                    <span class="fw-bold fs-6 text-gray-800 d-flex align-items-center">
+                      <i class="bi bi-building-check text-primary me-2"></i>
+                      {{ group.name }}
+                    </span>
+                    <span class="badge badge-light-info fw-semibold fs-8">
+                      {{ group.areas.length }} {{ translate("Areas") }}
+                    </span>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2">
+                    <span
+                      v-for="area in group.areas"
+                      :key="area.id"
+                      class="badge badge-light-primary border border-primary border-opacity-25 px-3 py-2 fs-7 fw-medium d-inline-flex align-items-center"
+                    >
+                      <i class="bi bi-geo-alt me-1 fs-8 text-primary"></i>
+                      {{ isArabic ? area.nameAr : area.nameEn }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attached Maids List Section -->
+        <div class="col-xl-6">
+          <div class="card card-flush h-100">
+            <div class="card-header pt-6">
+              <div class="card-title">
+                <h3 class="card-label fw-bold fs-4 text-gray-800 mb-0">
+                  <i class="bi bi-person-hearts text-success me-2"></i>
+                  {{ translate("Attached Maids") }}
+                  <span class="badge badge-light-success ms-2 fs-7">
                     {{ (pickupPoint.maids || []).length }}
                   </span>
                 </h3>
@@ -289,13 +306,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed, nextTick } from "vue";
+import { defineComponent, ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import PickupPointService from "@/core/services/PickupPointService";
 import type { PickupPointData } from "@/core/types";
 import { translate } from "@/core/helpers/i18n-utils";
 import i18n from "@/core/plugins/i18n";
-import { loadGoogleMaps } from "@/core/helpers/google-maps-loader";
 import { usePermissions } from "@/composables/usePermissions";
 
 export default defineComponent({
@@ -305,8 +321,6 @@ export default defineComponent({
     const pickupPointId = route.params.id as string;
     const pickupPoint = ref<PickupPointData | null>(null);
     const loading = ref(true);
-    const mapLoading = ref(true);
-    const mapContainer = ref<HTMLElement | null>(null);
     const { can } = usePermissions();
 
     const isArabic = computed(
@@ -315,60 +329,33 @@ export default defineComponent({
         i18n.global.locale === "ar",
     );
 
-    const initMap = async () => {
-      if (!pickupPoint.value || !mapContainer.value) return;
+    const groupedAreas = computed(() => {
+      if (!pickupPoint.value?.areas || pickupPoint.value.areas.length === 0) return [];
+      const map = new Map<string, { id: number | null; name: string; areas: any[] }>();
 
-      try {
-        mapLoading.value = true;
-        const currentLang = isArabic.value ? "ar" : "en";
-        const googleMaps = await loadGoogleMaps(currentLang);
+      for (const area of pickupPoint.value.areas) {
+        const gov = (area as any).governorate;
+        const govId = gov?.id ?? "none";
+        const govName = gov
+          ? (isArabic.value ? gov.nameAr : gov.nameEn) || gov.nameEn || gov.nameAr
+          : translate("Not Assigned");
 
-        const lat = Number(pickupPoint.value.lat) || 29.3759;
-        const lng = Number(pickupPoint.value.long) || 47.9774;
-        const center = new googleMaps.LatLng(lat, lng);
-
-        const map = new googleMaps.Map(mapContainer.value, {
-          center,
-          zoom: 13,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: true,
-          zoomControl: true,
-        });
-
-        // Center Marker
-        new googleMaps.Marker({
-          position: center,
-          map,
-          title: pickupPoint.value.label,
-        });
-
-        // Radius Coverage Circle
-        const radiusMeters = (Number(pickupPoint.value.distance) || 5) * 1000;
-        new googleMaps.Circle({
-          strokeColor: "#009ef7",
-          strokeOpacity: 0.85,
-          strokeWeight: 2,
-          fillColor: "#009ef7",
-          fillOpacity: 0.18,
-          map,
-          center,
-          radius: radiusMeters,
-        });
-      } catch (err) {
-        console.error("Error initializing details map:", err);
-      } finally {
-        mapLoading.value = false;
+        if (!map.has(String(govId))) {
+          map.set(String(govId), {
+            id: gov?.id ?? null,
+            name: govName,
+            areas: [],
+          });
+        }
+        map.get(String(govId))!.areas.push(area);
       }
-    };
+      return Array.from(map.values());
+    });
 
     onMounted(() => {
       PickupPointService.get(pickupPointId)
         .then((data: any) => {
           pickupPoint.value = data;
-          nextTick(() => {
-            initMap();
-          });
         })
         .catch((err) => {
           console.error("Error fetching pickup point:", err);
@@ -381,10 +368,10 @@ export default defineComponent({
     return {
       pickupPoint,
       loading,
-      mapLoading,
-      mapContainer,
       translate,
       can,
+      isArabic,
+      groupedAreas,
     };
   },
 });

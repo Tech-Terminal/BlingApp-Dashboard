@@ -1,14 +1,10 @@
 <template>
-  <div class="card">
-    <div class="card-header border-0 pt-6">
-      <div class="card-title">
-        <h2 class="d-flex align-items-center gap-2">
-          <i class="bi bi-pencil-square text-primary fs-1"></i>
-          <span>{{ translate("Edit Pick Up Point") }}</span>
-        </h2>
-      </div>
-    </div>
-    <div class="card-body pt-0">
+  <FormCard
+    :title="translate('Edit Pick Up Point')"
+    :hasStatus="true"
+    v-model:status="form.isActive"
+  >
+    <div class="card-body">
       <div v-if="loadingData" class="d-flex justify-content-center py-10">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">{{ translate("Loading...") }}</span>
@@ -25,13 +21,14 @@
         @cancel="discard"
       />
     </div>
-  </div>
+  </FormCard>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import PickupPointForm from "./PickupPointForm.vue";
+import FormCard from "@/components/utilities/FormCard.vue";
 import PickupPointService from "@/core/services/PickupPointService";
 import type { UpdatePickupPointPayload } from "@/core/types";
 import { useApiValidation } from "@/core/composables/useApiValidation";
@@ -42,6 +39,7 @@ export default defineComponent({
   name: "PickupPointEdit",
   components: {
     PickupPointForm,
+    FormCard,
   },
   setup() {
     const route = useRoute();
@@ -54,11 +52,9 @@ export default defineComponent({
       label: "",
       streetName: "",
       buildingNumber: "",
-      lat: 29.3759,
-      long: 47.9774,
-      distance: 5,
       isActive: true,
       maidIds: [],
+      areaIds: [],
     });
 
     const validation = useApiValidation();
@@ -71,11 +67,9 @@ export default defineComponent({
               label: data.label || "",
               streetName: data.streetName || "",
               buildingNumber: data.buildingNumber || "",
-              lat: Number(data.lat) || 29.3759,
-              long: Number(data.long) || 47.9774,
-              distance: Number(data.distance) || 5,
               isActive: data.isActive ?? true,
               maidIds: (data.maids || []).map((m: any) => m.id),
+              areaIds: (data.areas || []).map((a: any) => a.id),
             };
           }
         })

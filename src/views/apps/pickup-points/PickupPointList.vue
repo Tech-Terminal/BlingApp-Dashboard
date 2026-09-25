@@ -85,8 +85,7 @@
             <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
               <th class="min-w-50px">ID</th>
               <th class="min-w-220px">{{ translate("Pick Up Point") }}</th>
-              <th class="min-w-150px">{{ translate("Coordinates") }}</th>
-              <th class="min-w-120px">{{ translate("Coverage Radius") }}</th>
+              <th class="min-w-180px">{{ translate("Covered Areas") }}</th>
               <th class="min-w-180px">{{ translate("Assigned Maids") }}</th>
               <th class="min-w-100px">{{ translate("Status") }}</th>
               <th class="min-w-120px">{{ translate("Created Date") }}</th>
@@ -128,30 +127,34 @@
                 </div>
               </td>
 
-              <!-- Coordinates -->
-              <td>
-                <div v-if="point.lat && point.long" class="d-flex flex-column">
-                  <span class="badge badge-light font-monospace text-gray-800 py-1 px-2 mb-1 w-fit">
-                    <i class="bi bi-crosshair text-primary me-1"></i>
-                    {{ Number(point.lat).toFixed(4) }}, {{ Number(point.long).toFixed(4) }}
-                  </span>
-                  <a
-                    :href="`https://www.google.com/maps?q=${point.lat},${point.long}`"
-                    target="_blank"
-                    class="text-primary text-hover-underline fs-8 d-inline-flex align-items-center"
-                  >
-                    <span>Google Maps</span>
-                    <i class="bi bi-box-arrow-up-right fs-9 ms-1"></i>
-                  </a>
-                </div>
-                <span v-else class="text-muted fs-7">{{ translate("N/A") }}</span>
-              </td>
 
-              <!-- Coverage Radius -->
+              <!-- Covered Areas -->
               <td>
-                <span class="badge badge-light-info fw-bold py-2 px-3 fs-7">
-                  <i class="bi bi-broadcast me-1 text-info"></i>
-                  {{ point.distance || 5 }} KM
+                <div v-if="point.areas && point.areas.length > 0" class="d-flex flex-column gap-1">
+                  <div class="d-flex align-items-center gap-1">
+                    <span class="badge badge-light-primary fw-bold fs-7">
+                      <i class="bi bi-pin-map-fill text-primary me-1"></i>
+                      {{ point.areas.length }} {{ point.areas.length === 1 ? translate("Covered Area") : translate("Covered Areas") }}
+                    </span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-1">
+                    <span
+                      v-for="area in point.areas.slice(0, 2)"
+                      :key="area.id"
+                      class="badge badge-light text-gray-700 fs-9 py-0 px-2"
+                    >
+                      {{ isArabic ? area.nameAr : area.nameEn }}
+                    </span>
+                    <span
+                      v-if="point.areas.length > 2"
+                      class="badge badge-light text-muted fs-9 py-0 px-1"
+                    >
+                      +{{ point.areas.length - 2 }}
+                    </span>
+                  </div>
+                </div>
+                <span v-else class="badge badge-light text-muted fs-8">
+                  {{ translate("No areas covered yet.") }}
                 </span>
               </td>
 
@@ -306,6 +309,7 @@ import SearchableSelect from "@/components/inputs/SearchableSelect.vue";
 import FilterMenu from "@/components/filter/FilterMenu.vue";
 import EmptyState from "@/components/utilities/EmptyState.vue";
 import { translate } from "@/core/helpers/i18n-utils";
+import i18n from "@/core/plugins/i18n";
 import {
   showSuccessAlert,
   showErrorAlert,
@@ -329,6 +333,12 @@ export default defineComponent({
     const loading = ref(false);
     const search = ref("");
     const { can } = usePermissions();
+
+    const isArabic = computed(
+      () =>
+        (i18n.global.locale as any)?.value === "ar" ||
+        i18n.global.locale === "ar",
+    );
 
     const statusOptions = computed(() => [
       { id: null, name: translate("All") },
@@ -454,6 +464,7 @@ export default defineComponent({
       applyFilter,
       resetFilter,
       can,
+      isArabic,
     };
   },
 });

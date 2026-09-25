@@ -11,6 +11,8 @@ export interface AreaData {
   governorateId: number;
   nameEn: string;
   nameAr: string;
+  lat?: number | string;
+  long?: number | string;
   governorate?: GovernorateData;
   createdAt?: string;
   updatedAt?: string;

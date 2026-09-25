@@ -1,14 +1,10 @@
 <template>
-  <div class="card">
-    <div class="card-header border-0 pt-6">
-      <div class="card-title">
-        <h2 class="d-flex align-items-center gap-2">
-          <i class="bi bi-geo-alt-fill text-primary fs-1"></i>
-          <span>{{ translate("Add New Pick Up Point") }}</span>
-        </h2>
-      </div>
-    </div>
-    <div class="card-body pt-0">
+  <FormCard
+    :title="translate('Add New Pick Up Point')"
+    :hasStatus="true"
+    v-model:status="form.isActive"
+  >
+    <div class="card-body">
       <PickupPointForm
         v-model="form"
         :loading="loading"
@@ -18,13 +14,14 @@
         @cancel="discard"
       />
     </div>
-  </div>
+  </FormCard>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
 import PickupPointForm from "./PickupPointForm.vue";
+import FormCard from "@/components/utilities/FormCard.vue";
 import PickupPointService from "@/core/services/PickupPointService";
 import type { CreatePickupPointPayload } from "@/core/types";
 import { useApiValidation } from "@/core/composables/useApiValidation";
@@ -35,6 +32,7 @@ export default defineComponent({
   name: "PickupPointCreate",
   components: {
     PickupPointForm,
+    FormCard,
   },
   setup() {
     const router = useRouter();
@@ -43,11 +41,9 @@ export default defineComponent({
       label: "",
       streetName: "",
       buildingNumber: "",
-      lat: 29.3759,
-      long: 47.9774,
-      distance: 5,
       isActive: true,
       maidIds: [],
+      areaIds: [],
     });
 
     const validation = useApiValidation();

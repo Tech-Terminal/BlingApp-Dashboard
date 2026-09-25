@@ -9,53 +9,27 @@
             {{ translate("Point Information") }}
           </span>
           <span class="text-muted fs-7">
-            {{ translate("Configure pickup point identity and coverage") }}
+            {{ translate("Configure pickup point identity and details") }}
           </span>
         </h3>
       </div>
       <div class="card-body pt-0">
-        <!-- Label & Distance -->
+        <!-- Label -->
         <div class="row">
-          <div class="col-md-6 d-flex flex-column mb-7 fv-row">
+          <div class="col-12 d-flex flex-column mb-7 fv-row">
             <label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
               <span class="required">{{ translate("Label") }}</span>
             </label>
             <input
               type="text"
-              class="form-control form-control-solid"
+              class="form-control"
               :class="{ 'is-invalid': apiValidation.hasError('label') }"
               v-model="formData.label"
-              :placeholder="translate('e.g. Sabah Al Salem, Salmiya Station')"
+              :placeholder="translate('Enter label')"
               required
             />
             <div class="invalid-feedback" v-if="apiValidation.hasError('label')">
               {{ apiValidation.getError("label") }}
-            </div>
-          </div>
-
-          <div class="col-md-6 d-flex flex-column mb-7 fv-row">
-            <label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-              <span class="required">{{ translate("Distance Covered in Km") }}</span>
-            </label>
-            <div class="input-group input-group-solid">
-              <input
-                type="number"
-                step="0.5"
-                min="0.5"
-                max="100"
-                class="form-control form-control-solid"
-                :class="{ 'is-invalid': apiValidation.hasError('distance') }"
-                v-model.number="formData.distance"
-                @input="onDistanceChange"
-                required
-              />
-              <span class="input-group-text fw-bold">KM</span>
-            </div>
-            <div class="text-muted fs-8 mt-1">
-              {{ translate("The coverage radius will update automatically on the map.") }}
-            </div>
-            <div class="invalid-feedback" v-if="apiValidation.hasError('distance')">
-              {{ apiValidation.getError("distance") }}
             </div>
           </div>
         </div>
@@ -68,157 +42,205 @@
             </label>
             <input
               type="text"
-              class="form-control form-control-solid"
+              class="form-control"
               :class="{ 'is-invalid': apiValidation.hasError('streetName') }"
               v-model="formData.streetName"
-              :placeholder="translate('e.g. Block 2, Street 226')"
+              :placeholder="translate('Enter street name')"
             />
             <div class="invalid-feedback" v-if="apiValidation.hasError('streetName')">
               {{ apiValidation.getError("streetName") }}
             </div>
           </div>
 
-          <div class="col-md-4 d-flex flex-column mb-7 fv-row">
+          <div class="col-md-6 d-flex flex-column mb-7 fv-row">
             <label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-              <span>{{ translate("Building No") }}</span>
+              <span>{{ translate("Building Number") }}</span>
             </label>
             <input
               type="text"
-              class="form-control form-control-solid"
+              class="form-control"
               :class="{ 'is-invalid': apiValidation.hasError('buildingNumber') }"
               v-model="formData.buildingNumber"
-              :placeholder="translate('e.g. 8, Tower B')"
+              :placeholder="translate('Enter building number')"
             />
             <div class="invalid-feedback" v-if="apiValidation.hasError('buildingNumber')">
               {{ apiValidation.getError("buildingNumber") }}
             </div>
           </div>
-
-          <div class="col-md-2 d-flex flex-column mb-7 justify-content-center">
-            <label class="fs-6 fw-semibold form-label mb-2">{{ translate("Status") }}</label>
-            <div class="form-check form-switch form-check-custom form-check-solid mt-2">
-              <input
-                class="form-check-input h-25px w-45px"
-                type="checkbox"
-                id="isActiveSwitch"
-                v-model="formData.isActive"
-              />
-              <label class="form-check-label fw-bold ms-2" for="isActiveSwitch">
-                <span v-if="formData.isActive" class="badge badge-light-success fs-8">
-                  {{ translate("Active") }}
-                </span>
-                <span v-else class="badge badge-light-danger fs-8">
-                  {{ translate("Inactive") }}
-                </span>
-              </label>
-            </div>
-          </div>
         </div>
       </div>
     </div>
 
-    <!-- Card 2: Interactive Map & Coordinates -->
+    <!-- Card 2: Service Coverage (Governorates & Areas) -->
     <div class="card mb-6">
       <div class="card-header border-0 pt-6">
         <h3 class="card-title align-items-start flex-column">
-          <span class="card-label fw-bold fs-4 mb-1">
-            <i class="bi bi-map-fill text-primary me-2"></i>
-            {{ translate("Map & Coordinates") }}
-          </span>
+          <div class="d-flex align-items-center gap-2">
+            <span class="card-label fw-bold fs-4">
+              <i class="bi bi-pin-map-fill text-primary me-2"></i>
+              {{ translate("Service Areas") }}
+            </span>
+            <span class="badge badge-light-primary fw-bold fs-7">
+              {{ (formData.areaIds || []).length }} {{ translate("Covered Areas") }}
+            </span>
+          </div>
           <span class="text-muted fs-7">
-            {{ translate("Pinpoint the pickup center and define service perimeter") }}
+            {{ translate("Select the areas that this pickup point services.") }}
           </span>
         </h3>
-        <div class="card-toolbar">
+        <div class="card-toolbar d-flex gap-2">
           <button
+            v-if="selectedGovId"
             type="button"
             class="btn btn-sm btn-light-primary fw-bold"
-            @click="locateUser"
-            :disabled="locating"
+            @click="selectAllInCurrentGov"
           >
-            <span v-if="locating" class="spinner-border spinner-border-sm me-1"></span>
-            <i v-else class="bi bi-crosshair me-1"></i>
-            {{ locating ? translate("Locating...") : translate("Use Current Location") }}
+            <i class="bi bi-check2-all me-1"></i>
+            {{ translate("Select All in Governorate") }}
+          </button>
+          <button
+            v-if="(formData.areaIds || []).length > 0"
+            type="button"
+            class="btn btn-sm btn-light-danger fw-bold"
+            @click="clearAllAreas"
+          >
+            <i class="bi bi-x me-1"></i>
+            {{ translate("Clear All") }}
           </button>
         </div>
       </div>
       <div class="card-body pt-0">
-        <!-- Coordinates Inputs & Update Map Button -->
-        <div class="row align-items-end mb-4 bg-light p-4 rounded border border-gray-200">
-          <div class="col-md-4 mb-3 mb-md-0">
-            <label class="fs-7 fw-bold text-gray-700 mb-1">{{ translate("Latitude") }}</label>
-            <input
-              type="number"
-              step="any"
-              class="form-control form-control-sm form-control-solid"
-              v-model.number="formData.lat"
-              :placeholder="translate('Latitude')"
-            />
+        <!-- Filter Controls: Governorate SearchableSelect + Area Search Input -->
+        <div class="row g-3 align-items-center mb-5">
+          <!-- Governorate SearchableSelect -->
+          <div class="col-md-5">
+            <div class="d-flex align-items-center">
+              <label class="fs-7 fw-semibold form-label me-2 mb-0 text-nowrap">
+                <i class="bi bi-funnel text-primary me-1"></i>
+                {{ translate("Governorate") }}:
+              </label>
+              <div class="flex-grow-1">
+                <SearchableSelect
+                  v-model="selectedGovId"
+                  :service="GovernorateService"
+                  :label="locationLabel"
+                  :placeholder="translate('All Governorates')"
+                  :showAllOption="true"
+                  :perPage="50"
+                  @update:modelValue="onGovernorateChange"
+                />
+              </div>
+            </div>
           </div>
-          <div class="col-md-4 mb-3 mb-md-0">
-            <label class="fs-7 fw-bold text-gray-700 mb-1">{{ translate("Longitude") }}</label>
-            <input
-              type="number"
-              step="any"
-              class="form-control form-control-sm form-control-solid"
-              v-model.number="formData.long"
-              :placeholder="translate('Longitude')"
-            />
-          </div>
-          <div class="col-md-4">
-            <button
-              type="button"
-              class="btn btn-sm btn-primary w-100 fw-bold"
-              @click="syncMapFromInputs"
-            >
-              <i class="bi bi-arrow-repeat me-1"></i>
-              {{ translate("Update Map") }}
-            </button>
-          </div>
-        </div>
 
-        <!-- Google Places Search Bar -->
-        <div class="position-relative mb-4">
-          <span class="position-absolute top-50 translate-middle-y ms-4">
-            <i class="bi bi-search text-gray-500 fs-5"></i>
-          </span>
-          <input
-            ref="searchBoxInput"
-            type="text"
-            class="form-control form-control-solid ps-12"
-            :placeholder="translate('Search location or area on map...')"
-          />
-        </div>
-
-        <!-- Google Map Container -->
-        <div
-          ref="mapContainer"
-          class="rounded border border-gray-300 shadow-sm position-relative overflow-hidden"
-          style="height: 420px; width: 100%;"
-        >
-          <div
-            v-if="mapLoading"
-            class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75 z-index-2"
-          >
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">{{ translate("Please wait...") }}</span>
+          <!-- Area Search Input -->
+          <div class="col-md-7">
+            <div class="position-relative">
+              <span class="position-absolute top-50 translate-middle-y ms-4">
+                <i class="bi bi-search text-gray-500 fs-7"></i>
+              </span>
+              <input
+                type="text"
+                v-model="areaSearchQuery"
+                @input="onSearchInput"
+                class="form-control ps-12"
+                style="height: 43.78px;"
+                :placeholder="translate('Search covered areas...')"
+              />
             </div>
           </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-3 text-muted fs-7">
-          <span>
-            <i class="bi bi-info-circle me-1"></i>
-            {{ translate("Drag marker or click anywhere on the map to adjust coordinates.") }}
-          </span>
-          <span v-if="formData.lat && formData.long" class="badge badge-light-primary font-monospace">
-            {{ Number(formData.lat).toFixed(6) }}, {{ Number(formData.long).toFixed(6) }}
-          </span>
+        <!-- Selected Areas Chips -->
+        <div
+          v-if="(formData.areaIds || []).length > 0"
+          class="mb-5 p-4 rounded bg-light-primary border border-primary border-dashed"
+        >
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="fs-7 fw-bold text-primary">
+              <i class="bi bi-check-circle-fill me-1"></i>
+              {{ translate("Selected Areas") }} ({{ (formData.areaIds || []).length }}):
+            </span>
+          </div>
+          <div class="d-flex flex-wrap gap-2" style="max-height: 120px; overflow-y: auto;">
+            <span
+              v-for="area in selectedAreasList"
+              :key="area.id"
+              class="badge badge-white border border-gray-300 py-2 px-3 d-inline-flex align-items-center gap-2"
+            >
+              <span class="text-gray-800 fw-bold fs-8">
+                {{ isArabic ? area.nameAr : area.nameEn }}
+              </span>
+              <span
+                v-if="area.governorate"
+                class="badge badge-light-secondary text-muted fs-9 py-0 px-1"
+              >
+                {{ isArabic ? area.governorate.nameAr : area.governorate.nameEn }}
+              </span>
+              <a
+                href="javascript:void(0)"
+                class="text-muted text-hover-danger ms-1"
+                @click.stop="toggleArea(area.id)"
+                :title="translate('Remove')"
+              >
+                <i class="bi bi-x-circle-fill fs-8"></i>
+              </a>
+            </span>
+          </div>
+        </div>
+
+        <!-- Areas Grid Selection -->
+        <div v-if="loadingAreas" class="d-flex justify-content-center py-8">
+          <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+          <span class="ms-2 text-muted fs-7">{{ translate("Loading...") }}</span>
+        </div>
+
+        <div v-else-if="areas.length === 0" class="text-center py-6 text-muted fs-7">
+          <i class="bi bi-pin-map fs-2 text-gray-400 d-block mb-2"></i>
+          {{ translate("No areas found.") }}
+        </div>
+
+        <div v-else class="row g-2" style="max-height: 360px; overflow-y: auto;">
+          <div
+            v-for="area in areas"
+            :key="area.id"
+            class="col-sm-6 col-md-4 col-lg-3"
+          >
+            <div
+              class="card h-100 border cursor-pointer p-3 transition-all d-flex flex-row align-items-center justify-content-between"
+              :class="isAreaSelected(area.id) ? 'border-primary bg-light-primary' : 'border-gray-200 bg-white hover-border-primary'"
+              @click="toggleArea(area.id)"
+              style="transition: all 0.15s ease;"
+            >
+              <div class="min-w-0 pe-2">
+                <div class="text-gray-800 fw-bold fs-7 text-truncate">
+                  {{ isArabic ? area.nameAr : area.nameEn }}
+                </div>
+                <div class="text-muted fs-8 text-truncate">
+                  {{ getGovName(area) }}
+                </div>
+              </div>
+              <div>
+                <span
+                  v-if="isAreaSelected(area.id)"
+                  class="badge badge-primary badge-circle w-22px h-22px d-flex align-items-center justify-content-center"
+                >
+                  <i class="bi bi-check fs-7 text-white"></i>
+                </span>
+                <span
+                  v-else
+                  class="badge badge-light badge-circle w-22px h-22px d-flex align-items-center justify-content-center border"
+                >
+                  <i class="bi bi-plus fs-7 text-gray-400"></i>
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Card 3: Assigned Maids (Domain Rule: Each maid attached to a single pickup point) -->
+    <!-- Card 4: Assigned Maids -->
     <div class="card mb-6">
       <div class="card-header border-0 pt-6">
         <h3 class="card-title align-items-start flex-column">
@@ -245,7 +267,7 @@
           <input
             type="text"
             v-model="maidSearchQuery"
-            class="form-control form-control-solid ps-12 form-control-sm"
+            class="form-control ps-12 form-control-sm"
             :placeholder="translate('Search available maids...')"
           />
         </div>
@@ -268,7 +290,7 @@
             <span
               v-for="maid in selectedMaidsList"
               :key="maid.id"
-              class="badge badge-white shadow-sm border py-2 px-3 d-inline-flex align-items-center gap-2"
+              class="badge badge-white border border-gray-300 py-2 px-3 d-inline-flex align-items-center gap-2"
             >
               <div
                 class="symbol symbol-circle symbol-20px overflow-hidden flex-shrink-0"
@@ -303,7 +325,7 @@
           {{ translate("No maids available to attach.") }}
         </div>
 
-        <div v-else class="row g-3" style="max-height: 320px; overflow-y: auto;">
+        <div v-else class="row g-3" style="max-height: 300px; overflow-y: auto;">
           <div
             v-for="maid in filteredMaids"
             :key="maid.id"
@@ -311,7 +333,7 @@
           >
             <div
               class="card h-100 border cursor-pointer transition-all"
-              :class="isMaidSelected(maid.id) ? 'border-primary bg-light-primary' : 'border-gray-200 bg-white'"
+              :class="isMaidSelected(maid.id) ? 'border-primary bg-light-primary' : 'border-gray-200 bg-white hover-border-primary'"
               @click="toggleMaid(maid.id)"
               style="transition: all 0.2s ease;"
             >
@@ -353,8 +375,8 @@
     </div>
 
     <!-- Form Actions -->
-    <div class="d-flex justify-content-end gap-3 pt-5">
-      <button type="button" class="btn btn-light" @click="$emit('cancel')">
+    <div class="text-center pt-15">
+      <button type="button" class="btn btn-light me-3" @click="$emit('cancel')">
         {{ translate("Discard") }}
       </button>
       <button
@@ -379,16 +401,23 @@ import {
   computed,
   PropType,
   ref,
+  reactive,
+  watch,
   onMounted,
 } from "vue";
 import { translate } from "@/core/helpers/i18n-utils";
 import i18n from "@/core/plugins/i18n";
-import { loadGoogleMaps } from "@/core/helpers/google-maps-loader";
 import MaidService from "@/core/services/MaidService";
-import type { MaidData } from "@/core/types";
+import AreaService from "@/core/services/AreaService";
+import GovernorateService from "@/core/services/GovernorateService";
+import SearchableSelect from "@/components/inputs/SearchableSelect.vue";
+import type { MaidData, AreaData, GovernorateData } from "@/core/types";
 
 export default defineComponent({
   name: "PickupPointForm",
+  components: {
+    SearchableSelect,
+  },
   props: {
     modelValue: {
       type: Object as PropType<any>,
@@ -427,17 +456,124 @@ export default defineComponent({
         i18n.global.locale === "ar",
     );
 
-    // Google Maps References & State
-    const mapContainer = ref<HTMLElement | null>(null);
-    const searchBoxInput = ref<HTMLInputElement | null>(null);
-    const mapLoading = ref(true);
-    const locating = ref(false);
+    const locationLabel = computed(() => (isArabic.value ? "nameAr" : "nameEn"));
 
-    let googleMaps: typeof google.maps | null = null;
-    let map: google.maps.Map | null = null;
-    let marker: google.maps.Marker | null = null;
-    let circle: google.maps.Circle | null = null;
-    let autocomplete: google.maps.places.Autocomplete | null = null;
+    // Governorates and Areas state
+    const areas = ref<AreaData[]>([]);
+    const loadingAreas = ref(false);
+    const selectedGovId = ref<number | null>(null);
+    const areaSearchQuery = ref("");
+    const knownAreasMap = reactive(new Map<number, AreaData>());
+
+    watch(
+      () => formData.value.areas,
+      (val: any) => {
+        if (Array.isArray(val)) {
+          val.forEach((a: any) => {
+            if (a && a.id) knownAreasMap.set(a.id, a);
+          });
+        }
+      },
+      { immediate: true },
+    );
+
+    const fetchAreas = async () => {
+      try {
+        loadingAreas.value = true;
+        const params: any = {
+          page: 1,
+          limit: 250,
+        };
+        const rawGov = selectedGovId.value;
+        const govId =
+          typeof rawGov === "object" && rawGov !== null
+            ? (rawGov as any).id
+            : rawGov;
+        if (govId) {
+          params.governorateId = Number(govId);
+        }
+        const q = areaSearchQuery.value ? areaSearchQuery.value.trim() : "";
+        if (q) {
+          params.search = q;
+        }
+
+        const res: any = await AreaService.getAll(params);
+        const fetchedList: AreaData[] = res?.data || [];
+        areas.value = fetchedList;
+
+        for (const a of fetchedList) {
+          knownAreasMap.set(a.id, a);
+        }
+      } catch (err) {
+        console.error("Error loading areas:", err);
+      } finally {
+        loadingAreas.value = false;
+      }
+    };
+
+    const onGovernorateChange = (val: any) => {
+      selectedGovId.value = val;
+      fetchAreas();
+    };
+
+    watch(selectedGovId, () => {
+      fetchAreas();
+    });
+
+    let searchTimeout: any = null;
+    const onSearchInput = () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        fetchAreas();
+      }, 300);
+    };
+
+    const getGovName = (area: AreaData) => {
+      if (area.governorate) {
+        return isArabic.value ? area.governorate.nameAr : area.governorate.nameEn;
+      }
+      return "";
+    };
+
+    const isAreaSelected = (areaId: number) => {
+      return (formData.value.areaIds || []).includes(areaId);
+    };
+
+    const toggleArea = (areaId: number) => {
+      const current = [...(formData.value.areaIds || [])];
+      const idx = current.indexOf(areaId);
+      if (idx > -1) {
+        current.splice(idx, 1);
+      } else {
+        current.push(areaId);
+      }
+      formData.value.areaIds = current;
+    };
+
+    const clearAllAreas = () => {
+      formData.value.areaIds = [];
+    };
+
+    const selectAllInCurrentGov = () => {
+      const currentAreaIds = areas.value.map((a) => a.id);
+      const set = new Set([...(formData.value.areaIds || []), ...currentAreaIds]);
+      formData.value.areaIds = Array.from(set);
+    };
+
+    const selectedAreasList = computed(() => {
+      const ids = formData.value.areaIds || [];
+      return ids.map((id) => {
+        const found = knownAreasMap.get(id) || areas.value.find((a) => a.id === id);
+        return (
+          found || {
+            id,
+            nameEn: `Area #${id}`,
+            nameAr: `منطقة #${id}`,
+            governorate: null,
+          }
+        );
+      });
+    });
 
     // Maids state
     const availableMaids = ref<MaidData[]>([]);
@@ -448,11 +584,12 @@ export default defineComponent({
       try {
         loadingMaids.value = true;
         const res: any = await MaidService.getAll({
-          pagination: { limit: 100 },
-          filters: { isActive: true },
+          page: 1,
+          limit: 100,
         });
         const allMaids = res?.data || [];
         availableMaids.value = allMaids.filter((m: any) => {
+          if (!m.isActive) return false;
           if (!m.pickupPointId) return true;
           if (
             props.isEdit &&
@@ -504,177 +641,32 @@ export default defineComponent({
       );
     });
 
-    // Map initialization
-    const initGoogleMap = async () => {
-      try {
-        mapLoading.value = true;
-        const currentLang = isArabic.value ? "ar" : "en";
-        googleMaps = await loadGoogleMaps(currentLang);
-
-        if (!mapContainer.value) return;
-
-        const initialLat = Number(formData.value.lat) || 29.3759;
-        const initialLng = Number(formData.value.long) || 47.9774;
-        const latLng = new googleMaps.LatLng(initialLat, initialLng);
-
-        map = new googleMaps.Map(mapContainer.value, {
-          center: latLng,
-          zoom: 13,
-          mapTypeControl: true,
-          streetViewControl: false,
-          fullscreenControl: true,
-          zoomControl: true,
-          mapTypeControlOptions: {
-            position: googleMaps.ControlPosition.TOP_LEFT,
-          },
-        });
-
-        // Draggable Marker
-        marker = new googleMaps.Marker({
-          position: latLng,
-          map,
-          draggable: true,
-          animation: googleMaps.Animation.DROP,
-        });
-
-        // Coverage Radius Circle
-        const radiusMeters = (Number(formData.value.distance) || 5) * 1000;
-        circle = new googleMaps.Circle({
-          strokeColor: "#009ef7",
-          strokeOpacity: 0.85,
-          strokeWeight: 2,
-          fillColor: "#009ef7",
-          fillOpacity: 0.18,
-          map,
-          center: latLng,
-          radius: radiusMeters,
-        });
-
-        // Sync coordinates when marker dragged
-        marker.addListener("dragend", (e: google.maps.MapMouseEvent) => {
-          if (!e.latLng) return;
-          const lat = Number(e.latLng.lat().toFixed(7));
-          const lng = Number(e.latLng.lng().toFixed(7));
-          formData.value.lat = lat;
-          formData.value.long = lng;
-          if (circle) {
-            circle.setCenter(e.latLng);
-          }
-        });
-
-        // Sync coordinates on map click
-        map.addListener("click", (e: google.maps.MapMouseEvent) => {
-          if (!e.latLng) return;
-          const lat = Number(e.latLng.lat().toFixed(7));
-          const lng = Number(e.latLng.lng().toFixed(7));
-          formData.value.lat = lat;
-          formData.value.long = lng;
-          if (marker) {
-            marker.setPosition(e.latLng);
-          }
-          if (circle) {
-            circle.setCenter(e.latLng);
-          }
-        });
-
-        // Setup Places Autocomplete Search Box
-        if (searchBoxInput.value && googleMaps.places) {
-          autocomplete = new googleMaps.places.Autocomplete(searchBoxInput.value, {
-            fields: ["geometry", "name", "formatted_address"],
-          });
-          autocomplete.bindTo("bounds", map);
-
-          autocomplete.addListener("place_changed", () => {
-            const place = autocomplete?.getPlace();
-            if (!place || !place.geometry || !place.geometry.location) return;
-
-            const loc = place.geometry.location;
-            const lat = Number(loc.lat().toFixed(7));
-            const lng = Number(loc.lng().toFixed(7));
-
-            formData.value.lat = lat;
-            formData.value.long = lng;
-
-            if (map && marker && circle) {
-              map.setCenter(loc);
-              map.setZoom(14);
-              marker.setPosition(loc);
-              circle.setCenter(loc);
-            }
-          });
-        }
-      } catch (err) {
-        console.error("Error initializing Google Maps:", err);
-      } finally {
-        mapLoading.value = false;
-      }
-    };
-
-    // Update Circle radius when distance input changes
-    const onDistanceChange = () => {
-      const radiusMeters = (Number(formData.value.distance) || 5) * 1000;
-      if (circle) {
-        circle.setRadius(radiusMeters);
-      }
-    };
-
-    // "Update Map" button action
-    const syncMapFromInputs = () => {
-      if (!map || !marker || !circle || !googleMaps) return;
-      const lat = Number(formData.value.lat);
-      const lng = Number(formData.value.long);
-      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-        const target = new googleMaps.LatLng(lat, lng);
-        marker.setPosition(target);
-        circle.setCenter(target);
-        onDistanceChange();
-        map.panTo(target);
-        map.setZoom(14);
-      }
-    };
-
-    // Use current geolocation
-    const locateUser = () => {
-      if (!navigator.geolocation) return;
-      locating.value = true;
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          locating.value = false;
-          const lat = Number(pos.coords.latitude.toFixed(7));
-          const lng = Number(pos.coords.longitude.toFixed(7));
-          formData.value.lat = lat;
-          formData.value.long = lng;
-          if (map && marker && circle && googleMaps) {
-            const userPos = new googleMaps.LatLng(lat, lng);
-            marker.setPosition(userPos);
-            circle.setCenter(userPos);
-            map.setCenter(userPos);
-            map.setZoom(15);
-          }
-        },
-        (err) => {
-          locating.value = false;
-          console.warn("Geolocation error:", err);
-        },
-        { enableHighAccuracy: true, timeout: 8000 },
-      );
-    };
-
     const submit = () => {
       emit("submit");
     };
 
     onMounted(() => {
-      initGoogleMap();
+      fetchAreas();
       fetchAvailableMaids();
     });
 
     return {
       formData,
-      mapContainer,
-      searchBoxInput,
-      mapLoading,
-      locating,
+      isArabic,
+      locationLabel,
+      GovernorateService,
+      selectedGovId,
+      areaSearchQuery,
+      areas,
+      selectedAreasList,
+      loadingAreas,
+      getGovName,
+      isAreaSelected,
+      toggleArea,
+      clearAllAreas,
+      selectAllInCurrentGov,
+      onGovernorateChange,
+      onSearchInput,
       availableMaids,
       loadingMaids,
       maidSearchQuery,
@@ -683,9 +675,6 @@ export default defineComponent({
       isMaidSelected,
       toggleMaid,
       clearAllMaids,
-      onDistanceChange,
-      syncMapFromInputs,
-      locateUser,
       submit,
       translate,
     };
@@ -696,5 +685,14 @@ export default defineComponent({
 <style scoped>
 .transition-all {
   transition: all 0.2s ease-in-out;
+}
+.hover-border-primary:hover {
+  border-color: var(--bs-primary) !important;
+}
+:deep(.v-select .vs__dropdown-toggle) {
+  min-height: 43.78px;
+  height: 43.78px;
+  display: flex;
+  align-items: center;
 }
 </style>

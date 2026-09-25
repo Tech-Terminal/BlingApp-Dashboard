@@ -29,6 +29,7 @@ import { defineComponent, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import MaidForm from "./MaidForm.vue";
 import MaidService from "@/core/services/MaidService";
+import PickupPointService from "@/core/services/PickupPointService";
 import FormCard from "@/components/utilities/FormCard.vue";
 import { useApiValidation } from "@/core/composables/useApiValidation";
 import { translate } from "@/core/helpers/i18n-utils";
@@ -75,6 +76,10 @@ export default defineComponent({
             };
             if (maid.pickupPoint) {
               initialPickupPoint.value = maid.pickupPoint;
+            } else if (maid.pickupPointId) {
+              PickupPointService.get(maid.pickupPointId).then((pp: any) => {
+                if (pp) initialPickupPoint.value = pp;
+              });
             }
           }
         })
@@ -119,6 +124,7 @@ export default defineComponent({
       form,
       loading,
       loadingData,
+      initialPickupPoint,
       validation,
       updateMaid,
       discard,
